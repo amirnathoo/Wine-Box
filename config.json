@@ -1,0 +1,22 @@
+{
+	"author": "nathooamir@gmail.com", 
+	"config_version": "2", 
+	"description": "Keep track of which wines you like", 
+	"modules": {
+		"geolocation": true, 
+		"icons": {},  
+		"logging": {
+			"level": "DEBUG"
+		}, 
+		"prefs": true, 
+		"request": {
+			"permissions": []
+		}, 
+		"tools": true,
+		"topbar": true,
+		"tabbar": true
+	}, 
+	"name": "Wine Box", 
+	"platform_version": "v1.3", 
+	"version": "0.1"
+}

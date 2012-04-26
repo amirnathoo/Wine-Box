@@ -1,0 +1,240 @@
+body, html {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+span.a, #streams li {
+	cursor: pointer;
+}
+
+body {
+    background-color: #fbfbfb;
+	color: black;
+	font-family: "Helvetica Neue", "Helvetica", "Corbel", "Arial", sans-serif;
+	font-size: 11pt;
+	text-align: center;
+}
+
+input {
+	border: 1px solid #ccc;
+	height: 20px;
+	line-height: 20px;
+}
+
+a, a:visited {
+	color: #B00;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+div.button {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
+	background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+	background-color:#ededed;
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+	border:1px solid #dcdcdc;
+	border-radius:6px;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	color:#333;
+	display:inline-block;
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:1px 1px 0px #ffffff;
+	margin: 0 5px 10px 5px;
+}
+
+div.button:hover {
+	background-color:#dfdfdf;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
+	background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
+}
+
+div.button:active {
+	position:relative;
+	top:1px;
+}
+
+div.top-bar div.button {
+	line-height: 28px;
+	margin: 0 0 0 0.5em;
+	padding: 0 1em;
+}
+
+#page-header {
+	background: url("img/header.png") #b00 repeat;
+	box-shadow: 0 1px 12px rgba(34,25,25,0.4);
+	-moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4);
+	-webkit-box-shadow: 0 1px 12px rgba(34,25,25,0.4);
+	clear: both;
+	height: 50px;
+	width: 100%;
+}
+
+#index-button-container {
+	float: left;
+	margin-top: 11px;
+	text-align: center;
+	width: 15%;
+}
+
+#index-button, #plus-button {
+	cursor: pointer;
+	display: inline-block;
+}
+
+#logo-container {
+	float: left;
+	margin-top: 14px;
+	width: 70%;
+}
+
+#plus-button-container {
+	float: right;
+	margin-top: 11px;
+	text-align: center;
+	width: 15%;
+}
+
+.top-bar {
+	border-bottom: 1px solid #888;
+	color: #b00;
+	cursor: pointer;
+	font-size: 13pt;
+	height: 50px;
+	line-height: 48px;
+	width: 100%;
+}
+
+.top-bar-android {
+	background: url("img/search-gradient-android.png") #FFF repeat-x;
+}
+
+.top-bar-iphone {
+	background: url("img/search-gradient-iphone.png") #FFF repeat-x;	
+}
+
+.top-bar input {
+	box-shadow: 0 1px 1px #888;
+	-moz-box-shadow: 0 1px 1px #888;
+	-webkit-box-shadow: 0 1px 1px #888;
+	height: 28px;
+	padding-left: 10px;
+	width: 10em;
+}
+
+.top-bar-iphone input {
+	border-radius: 14px;
+	-moz-border-radius: 14px;
+}
+
+#photos {
+	margin: 10px auto 0 auto;
+}
+
+#nav-links {
+	margin-bottom: 1em;
+}
+
+#nav-divider {
+	display: none;
+}
+
+#prev-link, #next-link {
+	display: none;
+}
+
+#streams {
+	color: #666;
+	display: inline-block;
+	margin: 5px 0 0 0;
+}
+
+#streams ul {
+	margin: 0;
+	padding-left: 0;
+}
+
+.stream-container {
+	clear: left;
+	padding: 8px;
+	text-align: left;
+}
+
+div.step {
+	background-color: #fff;
+	box-shadow: 0 1px 3px rgba(34,25,25,0.4);
+	-moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4);
+	-webkit-box-shadow: 0 1px 3px rgba(34,25,25,0.4);
+	display: inline-block;
+	list-style: none;
+	overflow: hidden;
+	padding: 20px 10px 8px 10px;
+	text-align: center;
+	vertical-align: middle;
+	width: 100%;
+}
+
+div.large-photo {
+	margin-top: 0;
+}
+
+#app-download-container {
+	height: 220px;
+	width: 220px;
+}
+
+#large-photo-container {
+	padding: 15px 5px;
+}
+
+#large-photo {
+	max-width: 95%;
+}
+
+img.mobile-logo {
+	margin-top: 15px;
+}
+
+div.text {
+	margin-bottom: 3px;
+}
+
+span.loading {
+	color: #666;
+}
+
+#upsell {
+	display: none;
+	height: 100%;
+	width: 100%;
+}
+
+#scrollbox {
+	display: none;
+	padding-top: 10px;
+	position: relative;
+	width: 100%;
+	z-index: -1;
+}
+
+#start-stream-header {
+	display: none;
+}
+
+#footer {
+	clear: both;
+	padding: 20px 0 30px 0;
+	text-align: center;
+}
