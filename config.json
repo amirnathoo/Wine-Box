@@ -6,7 +6,7 @@
 		"geolocation": true, 
 		"icons": {},  
 		"logging": {
-			"level": "DEBUG"
+			"level": "WARNING"
 		}, 
 		"prefs": true, 
 		"request": {

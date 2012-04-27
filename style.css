@@ -1,3 +1,5 @@
+/* general styling */
+
 body, html {
 	height: 100%;
 	margin: 0;
@@ -30,6 +32,8 @@ a, a:visited {
 a:hover {
 	text-decoration: underline;
 }
+
+/* button styling */
 
 div.button {
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
@@ -66,175 +70,54 @@ div.button:active {
 	top:1px;
 }
 
-div.top-bar div.button {
-	line-height: 28px;
-	margin: 0 0 0 0.5em;
-	padding: 0 1em;
+/* instructions styling */
+div.step:active, div.step.active {
+	color: white;
+	text-shadow: 0 -1px 1px #46677F;
+	background: -webkit-gradient(linear,left top,left bottom,from(#7BB5DB),to(#4775B8));
+	background: -moz-linear-gradient(top,#7BB5DB,#4775B8);
+	background: linear-gradient(top,#7BB5DB,#4775B8);
+	border-bottom-color: #609FD0;
+	-moz-box-shadow: inset 0 2px 2px #4775b8;
+	-webkit-box-shadow: inset 0 2px 2px #4775b8;
+	-moz-box-shadow: inset 0 2px 2px #4775b8;
+	-webkit-box-shadow: inset 0 2px 2px #4775b8;
+	box-shadow: inset 0 2px 2px #4775b8;
 }
 
-#page-header {
-	background: url("img/header.png") #b00 repeat;
-	box-shadow: 0 1px 12px rgba(34,25,25,0.4);
-	-moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4);
-	-webkit-box-shadow: 0 1px 12px rgba(34,25,25,0.4);
-	clear: both;
-	height: 50px;
-	width: 100%;
+div.step:active img, div.step.active img {
+	display:none;
 }
 
-#index-button-container {
-	float: left;
-	margin-top: 11px;
-	text-align: center;
-	width: 15%;
+div.label {
+	position:absolute;
+	top:20px;
+	left:10px;
 }
 
-#index-button, #plus-button {
-	cursor: pointer;
-	display: inline-block;
-}
-
-#logo-container {
-	float: left;
-	margin-top: 14px;
-	width: 70%;
-}
-
-#plus-button-container {
-	float: right;
-	margin-top: 11px;
-	text-align: center;
-	width: 15%;
-}
-
-.top-bar {
-	border-bottom: 1px solid #888;
-	color: #b00;
-	cursor: pointer;
-	font-size: 13pt;
-	height: 50px;
-	line-height: 48px;
-	width: 100%;
-}
-
-.top-bar-android {
-	background: url("img/search-gradient-android.png") #FFF repeat-x;
-}
-
-.top-bar-iphone {
-	background: url("img/search-gradient-iphone.png") #FFF repeat-x;	
-}
-
-.top-bar input {
-	box-shadow: 0 1px 1px #888;
-	-moz-box-shadow: 0 1px 1px #888;
-	-webkit-box-shadow: 0 1px 1px #888;
-	height: 28px;
-	padding-left: 10px;
-	width: 10em;
-}
-
-.top-bar-iphone input {
-	border-radius: 14px;
-	-moz-border-radius: 14px;
-}
-
-#photos {
-	margin: 10px auto 0 auto;
-}
-
-#nav-links {
-	margin-bottom: 1em;
-}
-
-#nav-divider {
-	display: none;
-}
-
-#prev-link, #next-link {
-	display: none;
-}
-
-#streams {
-	color: #666;
-	display: inline-block;
-	margin: 5px 0 0 0;
-}
-
-#streams ul {
-	margin: 0;
-	padding-left: 0;
-}
-
-.stream-container {
-	clear: left;
-	padding: 8px;
-	text-align: left;
+img.icon {
+	position:absolute;
+	top:8px;
+	right:0px;
 }
 
 div.step {
+	font-size:20px;
+	font-weight:bold;
+	display:inline-block;
+	font-family:arial;
+	text-decoration:none;
 	background-color: #fff;
 	box-shadow: 0 1px 3px rgba(34,25,25,0.4);
 	-moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4);
 	-webkit-box-shadow: 0 1px 3px rgba(34,25,25,0.4);
 	display: inline-block;
-	list-style: none;
-	overflow: hidden;
-	padding: 20px 10px 8px 10px;
 	text-align: center;
 	vertical-align: middle;
 	width: 100%;
+	padding: 20px 0px;
 }
 
-div.large-photo {
-	margin-top: 0;
-}
-
-#app-download-container {
-	height: 220px;
-	width: 220px;
-}
-
-#large-photo-container {
-	padding: 15px 5px;
-}
-
-#large-photo {
-	max-width: 95%;
-}
-
-img.mobile-logo {
-	margin-top: 15px;
-}
-
-div.text {
-	margin-bottom: 3px;
-}
-
-span.loading {
-	color: #666;
-}
-
-#upsell {
-	display: none;
+#upload {
 	height: 100%;
-	width: 100%;
-}
-
-#scrollbox {
-	display: none;
-	padding-top: 10px;
-	position: relative;
-	width: 100%;
-	z-index: -1;
-}
-
-#start-stream-header {
-	display: none;
-}
-
-#footer {
-	clear: both;
-	padding: 20px 0 30px 0;
-	text-align: center;
 }
