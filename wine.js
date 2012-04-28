@@ -112,6 +112,7 @@ wine.types.Router = Backbone.Router.extend({
 	picture: function () {
 		$('#picture').remove();
 		$('#rate').remove();
+		forge.topbar.removeButtons();
 		state.currentPhoto = null;
 		var page = new wine.views.Picture();
 		page.render().show();
@@ -177,9 +178,15 @@ wine.views.Picture = Backbone.View.extend({
 		self.selImage = undefined;
 		forge.file.getImage({width: 500, height: 500}, function (file) {
 			forge.file.imageURL(file, function (url) {
-				state.currentPhoto = new wine.models.Photo({url: url});
-				self.selImage = file;
-				wine.router.rate();
+				forge.geolocation.getCurrentPosition(function(position) {
+					state.currentPhoto = new wine.models.Photo({
+						url: url,
+						time: new Date().getTime(),
+						position: position.coords
+					});
+					self.selImage = file;
+					wine.router.rate();
+				});
 			});
 		});
 	}
