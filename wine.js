@@ -2,13 +2,12 @@ forge.debug = true;
 
 //Style top bar and tab bar
 
-//TODO - check when there is a fix in the platform
-/*forge.topbar.setTint([88,22,43,0]);
-forge.tabbar.setTint([88,22,43,0]); */
+forge.topbar.setTint([88,22,43,255]);
+forge.tabbar.setActiveTint([88,22,43,255]);
 
 //Fake support of :active on Android
 var fake_active = function(el) {
-	if (forge.is.android()) {
+	if (forge.is.android() && $(el).hasClass('listenactive')) {
 		$(el).bind("touchstart", function () {
 			$(this).addClass("active");
 		}).bind("touchend", function() {
@@ -62,11 +61,7 @@ var config = {
 
 // Current state
 var state = {
-	animating: false,
-	index: 0,
-	location: null,
-	stream: null,
-	pageNum: 1
+	currentPhoto: {}
 };
 
 // Organisation object
@@ -170,197 +165,34 @@ if (forge.is.ios()) {
 // Router
 wine.types.Router = Backbone.Router.extend({
 	routes: {
-		"": "upload",
-		"upsell": "upsell",
-		"upload": "upload",
-		"photo/:stream/:photoId": "photo",
-		"stream/:stream": "stream"
+		"": "picture",
+		"picture": "picture",
+		"rate": "rate"
 	},
-	listStreams: function () {
-		$('#streams').show();
-		$('#photos').hide();
-		$('#upload').remove();
-		$('#upsell').hide();
-		$('#scrollbox').hide();
-		$('#page-title').text('');
-
-		/*loading();
-		forge.request.ajax({
-			url: "https://api.parse.com/1/classes/Stream",
-			headers: {
-				"X-Parse-Application-Id": config.parseAppId,
-				"X-Parse-REST-API-Key": config.parseRestKey
-			},
-			type: "GET",
-			dataType: 'json',
-			data: {
-				"order": "-updatedAt"
-			},
-			success: function (data) {
-				$('#streams ul').html('');
-				data.results.forEach(function (stream) {
-					var li = $('<li><span class="photoStream">#'+stream.stream+'</span></li>');
-					li.bind(clickEvent, function () {
-						window.location.hash = '#stream/'+stream.stream;
-					});
-					$('#streams ul').append(li);
-				})
-				loaded();
-				setupSearch();
-			},
-			error: function () {
-				loaded();
-			}
-		});*/
-
-	},
-	stream: function (stream) {
-		// TODO: Use views rather than hardcoded
-		if (!stream) {
-			stream = config.defaultStream;
-		}
-		if (state.stream != stream) {
-			state.stream = stream;
-
-			// Remove current photos
-			wine.photos.reset();
-			$('.loadedPhoto').remove();
-			wine.util.update(setupNav);
-		}
-		$('#photos').show();
-		$('#upload').remove();
-		$('#upsell').hide();
-		$('#scrollbox').hide();
-		$('#streams').hide();
-		$('.toUpload').remove();
-		setupNav();
-	},
-	upsell: function () {
-		// TODO: Detect iPhone/Android/Web and use appropriate message
-		$('#scrollbox').hide();
-		if (forge.is.web()) {
-			$('#photos').hide();
-			$('#upload').remove();
-			$('#upsell').show();
-			$('#streams').hide();
-		} else {
-			wine.router.navigate('stream/'+state.stream, true);
-		}
-	},
-	upload: function () {
-		var page = new wine.views.Upload();
+	picture: function () {
+		wine.util.reset();
+		var page = new wine.views.Picture();
 		page.render().show();
 	},
-	photo: function (stream, photoId) {
-		// TODO: Use views rather than hardcoded
-		$('#photos').hide();
-		$('#upload').remove();
-		$('#upsell').hide();
-		$('#scrollbox').hide();
-		$('#streams').hide();
-		if (state.stream != stream) {
-			state.stream = stream;
-		}
-		wine.util.update(function() { wine.util.getIndividualPhoto(photoId); });
+	rate: function() {
+		wine.util.reset();
+		var page = new wine.views.Rate();
+		page.render().show();
 	}
 });
 wine.router = new wine.types.Router();
 
 // Functions
 wine.util = {
-	upload: function () {
-		wine.router.navigate('upload', true);
+	reset: function () {
+		forge.topbar.removeButtons();
+		$('#picture').remove();
+		$('#rate').remove();
 	},
-	update: function (callback) {
-		loading();
-		/*forge.request.ajax({
-			url: "https://api.parse.com/1/classes/Photo",
-			headers: {
-				"X-Parse-Application-Id": config.parseAppId,
-				"X-Parse-REST-API-Key": config.parseRestKey
-			},
-			type: "GET",
-			dataType: 'json',
-			data: {
-				"where": '{"stream": "'+state.stream+'"}',
-				"order": "-createdAt"
-			},
-			success: function (data) {
-				data.results.forEach(function (file) {
-					if (!wine.photos.get(file.objectId)) {
-						wine.photos.add([{
-							id: file.objectId,
-							url: file.file.url,
-							timestamp: Date.parse(file.createdAt.replace('T', ' ').replace('Z','').substring(0, file.createdAt.indexOf('.'))).getTime()
-						}]);
-					}
-				})
-				loaded();
-				if (callback) {
-					callback();
-				}
-			},
-			error: function () {
-				loaded();
-			}
-		});*/
-	},
-	getIndividualPhoto: function(photoId) {
-		var photo = wine.photos.get(photoId);
-		state.index = wine.photos.indexOf(photo);
-		$(document).keydown(function(e){
-		    if (e.keyCode == 37) {
-   	    		wine.util.showIndividualPhoto(-1);
-		    } else if (e.keyCode == 39) {
-   	    		wine.util.showIndividualPhoto(1);
-		    }
+	disclosure_indicator: function(el) {
+		forge.tools.getURL('img/disclosure_indicator.png', function(src) {
+			$('img.icon', el).attr('src', src);
 		});
-		$('#large-photo').attr('src', photo.get('url'));
-		$('#scrollbox').show();
-	},
-	showIndividualPhoto: function(increment) {
-		if (state.animating) {
-			return;
-		}
-		state.animating = true;
-	    var nextPhoto = '';
-	    // A null state.index means show the 'Upsell' box instead of a photo
-		if (state.index == null) {
-			state.index = increment == 1 ? 0 : wine.photos.length - 1;
-			nextPhoto = wine.photos.at(state.index).get('url');
-		} else {
-	    	state.index += increment;
-	    	if (state.index == -1 || state.index == wine.photos.length) {
-	    		state.index = null;
-	    	}
-			else {
-				nextPhoto = wine.photos.at(state.index).get('url');
-			}
-	    }
-
-		var xShift = 500;
-		$('#scrollbox').animate({
-		    opacity: 0,
-		    left: '+=' + increment * xShift
-			}, {
-			duration: 200,
-			complete: function() {
-				$('#scrollbox').css('left', -1 * increment * xShift);
-				if(!nextPhoto) {
-			    	$('#start-stream-header').show();
-			    	$('#large-photo').hide();
-				} else {
-			    	$('#start-stream-header').hide();
-			    	$('#large-photo').show();
-				}
-				$('#large-photo').attr('src', nextPhoto);
-				$('#scrollbox').animate({
-				    opacity: 1,
-				    left: '+=' + increment * xShift
-				}, {
-					duration: 200
-				});
-				state.animating = false;}});
 	},
 	showPhoto: function(el, preloadImage, target) { 
 		return function() {
@@ -395,35 +227,23 @@ wine.collections.Photos = Backbone.Collection.extend({
 	}
 });
 wine.photos = new wine.collections.Photos();
-wine.photos.on('add', function (model) {
-	var photo = new wine.views.Photo({
-		model: model
-	});
-
-	var index = wine.photos.indexOf(model);
-	loading();
-	var pageNum = Math.floor(index / config.pageSize) + 1;
-	if (index == 0) {
-		$('#header').after(photo.render(pageNum, false).el);
-	} else {
-		$(wine.photos.at(index-1).get('el')).after(photo.render(pageNum, false).el);
-	}
-});
 
 // Views
-wine.views.Upload = Backbone.View.extend({
+wine.views.Picture = Backbone.View.extend({
 	tagName: "div",
-	id: "upload",
+	id: "picture",
 	render: function() {
 		var el = this.el;
-		$(el).html('<div id="choosephoto" class="step"><div class="label">1.</div><div class="instruction">Take picture of label</div><img class="icon"></img></div>');
-		forge.tools.getURL('img/disclosure_indicator.png', function(src) {
-			$('img.icon', el).attr('src', src);
-		});
-		forge.tools.getURL('img/wine.jpg', function(src) {
+		$(el).html('<div id="choosephoto" class="step listenactive"><div class="label">1.</div><div class="instruction">Take picture of label</div><img class="icon"></img></div>');
+		wine.util.disclosure_indicator(el);
+		if (wine.photos.length) {
+			var src = wine.photos.at(wine.photos.length-1).get('url');
 			$(el).attr('style', 'width:100%;height:100%;background-image:url('+src+');background-size:cover;');
-		});
-		_.bindAll(this);
+		} else {
+			forge.tools.getURL('img/wine.jpg', function(src) {
+				$(el).attr('style', 'width:100%;height:100%;background-image:url('+src+');background-size:cover;');
+			});
+		}
 		$('#choosephoto', el).bind(clickEvent, this.choose);
 		fake_active($('#choosephoto', el));
 		return this;
@@ -434,32 +254,60 @@ wine.views.Upload = Backbone.View.extend({
 	choose: function () {
 		var self = this;
 		self.selImage = undefined;
-		$('.toUpload').remove();
 		forge.file.getImage({width: 500, height: 500}, function (file) {
 			forge.file.imageURL(file, function (url) {
-				var photo = new wine.views.Photo({
-					model: new wine.models.Photo({url: url})
-				});
+				state.currentPhoto = new wine.models.Photo({url: url});
+				self.selImage = file;
+				wine.router.rate();
 			});
-			self.selImage = file;
-			$(self.el).html('<div class="step"><div class="label">2.</div><div class="instruction">Rate wine</div></div>');
-			alert('amirtest');
 		});
 	}
 });
 
-wine.views.Photo = Backbone.View.extend({
+wine.views.Rate = Backbone.View.extend({
 	tagName: "div",
-	className: "photo",
-
-	render: function(pageNum, isUpload) {
+	id: "rate",
+	render: function() {
+		forge.topbar.addButton({
+			text: 'Back',
+			position: 'left'
+		}, function() {
+			wine.router.picture();
+		});
 		var el = this.el;
-		this.model.set('el', el);
-		$(el).hide();
-		var preloadImage = new Image();
-		var photoId = this.model.get('id');
-		preloadImage.onload = wine.util.showPhoto;
-		preloadImage.src = this.model.get('url');
+		$(el).html('<div id="ratephoto" class="step listenactive"><div class="label">2.</div><div class="instruction">Rate wine</div><img class="icon"></div>');
+		wine.util.disclosure_indicator(el);
+		$(el).attr('style', 'width:100%;height:100%;background-image:url('+state.currentPhoto.get('url')+');background-size:cover;');
+		$('#ratephoto', el).bind(clickEvent, this.rate);
+		fake_active($('#ratephoto', el));
+		return this;
+	},
+	show: function () {
+		$('body').append(this.el);
+	},
+	rate: function() {
+		$('#ratephoto').unbind(clickEvent, this.rate);
+		forge.tools.getURL('img/sprite.gif', function(src) {
+			$('#ratephoto').removeClass('listenactive');
+			$('#ratephoto').html('<fieldset><div><label class="1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
+			$('#ratephoto img').bind(clickEvent, function(ev) {
+				forge.topbar.addButton({
+					text: 'Save',
+					position: 'right'
+				}, function() {
+					wine.photos.add(state.currentPhoto);
+					wine.router.picture();
+				});
+				$('#ratephoto label').removeClass('no_star');
+				var rating = parseInt($(ev.target).parent().attr('class'));
+				$('#ratephoto label').each(function(idx, el) {
+					if (parseInt($(el).attr('class')) > rating) {
+						$(el).addClass('no_star');
+					}
+				});
+				state.currentPhoto.set('rating', rating);
+			});
+		});
 		return this;
 	}
 });

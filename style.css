@@ -71,7 +71,7 @@ div.button:active {
 }
 
 /* instructions styling */
-div.step:active, div.step.active {
+div.listenactive:active, div.listenactive.active {
 	color: white;
 	text-shadow: 0 -1px 1px #46677F;
 	background: -webkit-gradient(linear,left top,left bottom,from(#7BB5DB),to(#4775B8));
@@ -85,24 +85,24 @@ div.step:active, div.step.active {
 	box-shadow: inset 0 2px 2px #4775b8;
 }
 
-div.step:active img, div.step.active img {
+div.listenactive:active img, div.listenactive.active img {
 	display:none;
 }
 
 div.label {
 	position:absolute;
-	top:20px;
+	top:16px;
 	left:10px;
 }
 
 img.icon {
 	position:absolute;
-	top:8px;
+	top:3px;
 	right:0px;
 }
 
 div.step {
-	font-size:20px;
+	font-size:18px;
 	font-weight:bold;
 	display:inline-block;
 	font-family:arial;
@@ -115,9 +115,37 @@ div.step {
 	text-align: center;
 	vertical-align: middle;
 	width: 100%;
-	padding: 20px 0px;
+	padding: 16px 0px;
 }
 
-#upload {
-	height: 100%;
+/* ratings widget */
+#ratephoto fieldset {
+	text-align: center;
+}
+#ratephoto fieldset div {
+	width: 7em;
+	margin:0px auto;
+}
+#ratephoto fieldset br {
+	display:none;
+}
+#ratephoto fieldset label {
+	position:relative;
+	height:1.4em;
+	width:1.4em;
+	overflow:hidden;
+	float:left;
+}
+#ratephoto fieldset img {
+	width:2.8em;
+	height:1.4em;
+	position:absolute;
+	top:0;
+	left:0;
+}
+#ratephoto fieldset .no_star img {
+	left:-1.4em;
+}
+#ratephoto fieldset {
+	margin:0px auto;
 }
