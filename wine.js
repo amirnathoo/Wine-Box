@@ -1,4 +1,4 @@
-//forge.debug = true;
+forge.debug = true;
 
 //Style top bar and tab bar
 
@@ -16,13 +16,6 @@ var fake_active = function(el) {
 	}
 }
 
-//Instrument tab bar for transitions
-var scrollTop = function () {
-	setTimeout(function () {
-		document.body.scrollTop = 0;
-	}, 0);
-}
-
 var starterButton = forge.tabbar.addButton({
 	text: "Rate Wine",
 	icon: "img/star.png",
@@ -32,7 +25,7 @@ var starterButton = forge.tabbar.addButton({
 	button.onPressed.addListener(function () {
 		wine.router.rateTab();
 	});
-	wine.router.rateTab();
+	wine.router.init();
 });
 
 var mainButton = forge.tabbar.addButton({
@@ -84,17 +77,20 @@ if (clickEvent == 'tap') {
 // Router
 wine.types.Router = Backbone.Router.extend({
 	routes: {
-		"": "rateTab",
+		"": "init",
 		"rateTab": "rateTab",
 		"picture": "picture",
 		"rate": "rate"
+	},
+	init: function() {
+		state.list = new wine.views.List()
+		state.list.render();
+		wine.router.rateTab();
 	},
 	rateTab: function() {
 		state.rateButton.setActive();
 		forge.topbar.setTitle("Rate Wine");
 		forge.topbar.removeButtons();
-		$('#rate_container').show();
-		$('#list_container').hide();
 		if (state.currentPhoto === null) {
 			wine.router.picture();
 		} else {
@@ -105,25 +101,18 @@ wine.types.Router = Backbone.Router.extend({
 		state.listButton.setActive();
 		forge.topbar.setTitle("My Wine");
 		forge.topbar.removeButtons();
-		$('#rate_container').hide();
-		$('#list_container').show();
-		scrollTop();
+		state.list.show();
 	},
 	picture: function () {
-		$('#picture').remove();
-		$('#rate').remove();
 		forge.topbar.removeButtons();
 		state.currentPhoto = null;
 		var page = new wine.views.Picture();
 		page.render().show();
 	},
 	rate: function() {
-		$('#picture').remove();
-		$('#rate').remove();
 		forge.topbar.removeButtons();
 		var page = new wine.views.Rate();
 		page.render().show();
-		state.rate = true;
 	}
 });
 wine.router = new wine.types.Router();
@@ -149,6 +138,9 @@ wine.collections.Photos = Backbone.Collection.extend({
 	}
 });
 wine.photos = new wine.collections.Photos();
+wine.photos.on("add", function(photo) {
+	state.list.add(photo);
+});
 
 // Views
 wine.views.Picture = Backbone.View.extend({
@@ -156,7 +148,7 @@ wine.views.Picture = Backbone.View.extend({
 	id: "picture",
 	render: function() {
 		var el = this.el;
-		$(el).html('<div id="choosephoto" class="step listenactive"><div class="label">1.</div><div class="instruction">Take picture of label</div><img class="icon"></img></div>');
+		$(el).html('<div id="choosephoto" class="step center listenactive"><div class="label">1.</div><div class="instruction">Take picture of label</div><img class="icon"></img></div>');
 		wine.util.disclosure_indicator(el);
 		if (wine.photos.length) {
 			var src = wine.photos.at(wine.photos.length-1).get('url');
@@ -171,6 +163,10 @@ wine.views.Picture = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
+		$('#rate_container').show();
+		$('#list_container').hide();
+		$('#picture').remove();
+		$('#rate').remove();
 		$('#rate_container').append(this.el);
 	},
 	choose: function () {
@@ -203,7 +199,7 @@ wine.views.Rate = Backbone.View.extend({
 			wine.router.picture();
 		});
 		var el = this.el;
-		$(el).html('<div id="ratephoto" class="step listenactive"></div>');
+		$(el).html('<div id="ratephoto" class="step center listenactive"></div>');
 		$(el).attr('style', 'width:100%;height:100%;background-image:url('+state.currentPhoto.get('url')+');background-size:cover;');
 		if (state.currentPhoto.get('rating')) {
 			this.rate();
@@ -216,6 +212,10 @@ wine.views.Rate = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
+		$('#rate_container').show();
+		$('#list_container').hide();
+		$('#picture').remove();
+		$('#rate').remove();
 		$('#rate_container').append(this.el);
 	},
 	rate: function() {
@@ -225,7 +225,7 @@ wine.views.Rate = Backbone.View.extend({
 				position: 'right'
 			}, function() {
 				wine.photos.add(state.currentPhoto);
-				state.currentPhoto = null
+				state.currentPhoto = null;
 				wine.router.listTab();
 			});
 			$('#ratephoto label').removeClass('no_star');
@@ -251,7 +251,28 @@ wine.views.Rate = Backbone.View.extend({
 	}
 });
 
+wine.views.List = Backbone.View.extend({
+	tagName: "div",
+	id: "list",
+	render: function() {
+		var el = this.el;
+		var obj = { "list": wine.photos.toJSON() }; 
+		var output = Mustache.render('{{#list}}<div class="step left listenactive">{{url}}</div>{{/list}}', obj);
+		$(el).html(output);
+		$('#list_container').append(el);
+		return this;
+	},
+	add: function(photo) {
+		var el = this.el;
+		$(el).prepend('<div class="step left listenactive">'+photo.get('url')+'</div>');
+	},
+	show: function () {
+		$('#rate_container').hide();
+		$('#list_container').show();
+	}
+});
+
 // Initialise app
 $(function () {
-	Backbone.history.start()
+	Backbone.history.start();
 });
