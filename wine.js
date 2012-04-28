@@ -1,4 +1,4 @@
-forge.debug = true;
+//forge.debug = true;
 
 //Style top bar and tab bar
 
