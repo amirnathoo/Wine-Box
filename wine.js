@@ -1,7 +1,6 @@
 forge.debug = true;
 
 //Style top bar and tab bar
-
 forge.topbar.setTint([88,22,43,255]);
 forge.tabbar.setActiveTint([88,22,43,255]);
 
@@ -25,7 +24,12 @@ var starterButton = forge.tabbar.addButton({
 	button.onPressed.addListener(function () {
 		wine.router.rateTab();
 	});
-	wine.router.init();
+	
+	// Initialise app
+	state.list = new wine.views.List()
+	state.list.render();
+	wine.router.rateTab();
+	Backbone.history.start();
 });
 
 var mainButton = forge.tabbar.addButton({
@@ -77,15 +81,9 @@ if (clickEvent == 'tap') {
 // Router
 wine.types.Router = Backbone.Router.extend({
 	routes: {
-		"": "init",
 		"rateTab": "rateTab",
 		"picture": "picture",
 		"rate": "rate"
-	},
-	init: function() {
-		state.list = new wine.views.List()
-		state.list.render();
-		wine.router.rateTab();
 	},
 	rateTab: function() {
 		state.rateButton.setActive();
@@ -137,9 +135,12 @@ wine.collections.Photos = Backbone.Collection.extend({
 		return -model.get('timestamp');
 	}
 });
-wine.photos = new wine.collections.Photos();
+wine.photos = (localStorage.photos)? 
+	new wine.collections.Photos(JSON.parse(localStorage.photos)): 
+	new wine.collections.Photos();
 wine.photos.on("add", function(photo) {
 	state.list.add(photo);
+	localStorage.photos = JSON.stringify(wine.photos.toArray());
 });
 
 // Views
@@ -177,7 +178,7 @@ wine.views.Picture = Backbone.View.extend({
 				forge.geolocation.getCurrentPosition(function(position) {
 					state.currentPhoto = new wine.models.Photo({
 						url: url,
-						time: new Date().getTime(),
+						timestamp: new Date().getTime(),
 						position: position.coords
 					});
 					self.selImage = file;
@@ -272,7 +273,4 @@ wine.views.List = Backbone.View.extend({
 	}
 });
 
-// Initialise app
-$(function () {
-	Backbone.history.start();
-});
+
