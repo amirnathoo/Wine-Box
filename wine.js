@@ -33,7 +33,7 @@ var starterButton = forge.tabbar.addButton({
 });
 
 var mainButton = forge.tabbar.addButton({
-	text: "My Wine",
+	text: "Wine List",
 	icon: "img/bottle.png",
 	index: 1
 }, function (button) {
@@ -97,7 +97,7 @@ wine.types.Router = Backbone.Router.extend({
 	},
 	listTab: function() {
 		state.listButton.setActive();
-		forge.topbar.setTitle("My Wine");
+		forge.topbar.setTitle("Wine List");
 		forge.topbar.removeButtons();
 		state.list.show();
 	},
@@ -120,6 +120,14 @@ wine.util = {
 	disclosure_indicator: function(el) {
 		forge.tools.getURL('img/disclosure_indicator.png', function(src) {
 			$('img.icon', el).attr('src', src);
+		});
+	},
+	handleRatingClick: function(rating, el) {
+		$('label', el).removeClass('no_star');
+		$('label', el).each(function(idx, el) {
+			if (parseInt($(el).attr('class').split('_')[1]) > rating) {
+				$(el).addClass('no_star');
+			}
 		});
 	}
 }
@@ -200,15 +208,15 @@ wine.views.Rate = Backbone.View.extend({
 			wine.router.picture();
 		});
 		var el = this.el;
-		$(el).html('<div id="ratephoto" class="step center listenactive"></div>');
+		$(el).html('<div class="ratephoto step center listenactive"></div>');
 		$(el).attr('style', 'width:100%;height:100%;background-image:url('+state.currentPhoto.get('url')+');background-size:cover;');
 		if (state.currentPhoto.get('rating')) {
 			this.rate();
 		} else {
-			$('#ratephoto', el).html('<div class="label">2.</div><div class="instruction">Rate wine</div><img class="icon">');
+			$('.ratephoto', el).html('<div class="label">2.</div><div class="instruction">Rate wine</div><img class="icon">');
 			wine.util.disclosure_indicator(el);
-			$('#ratephoto', el).bind(clickEvent, this.rate);
-			fake_active($('#ratephoto', el));
+			fake_active($('.ratephoto', el));
+			$('.ratephoto', el).bind(clickEvent, this.rate);
 		}
 		return this;
 	},
@@ -220,7 +228,7 @@ wine.views.Rate = Backbone.View.extend({
 		$('#rate_container').append(this.el);
 	},
 	rate: function() {
-		function handleRatingClick(rating) {
+		function addSaveButton() {
 			forge.topbar.addButton({
 				text: 'Save',
 				position: 'right'
@@ -229,23 +237,21 @@ wine.views.Rate = Backbone.View.extend({
 				state.currentPhoto = null;
 				wine.router.listTab();
 			});
-			$('#ratephoto label').removeClass('no_star');
-			$('#ratephoto label').each(function(idx, el) {
-				if (parseInt($(el).attr('class').split('_')[1]) > rating) {
-					$(el).addClass('no_star');
-				}
-			});
-			state.currentPhoto.set('rating', rating);
 		}
-		$('#ratephoto').unbind(clickEvent, this.rate);
+		
+		$('#rate_container .ratephoto').unbind(clickEvent, this.rate);
 		forge.tools.getURL('img/sprite.gif', function(src) {
-			$('#ratephoto').removeClass('listenactive');
-			$('#ratephoto').html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
-			$('#ratephoto img').bind(clickEvent, function(ev) {
-				handleRatingClick(parseInt($(ev.target).parent().attr('class').split('_')[1]));
+			$('#rate_container .ratephoto').removeClass('listenactive');
+			$('#rate_container .ratephoto').html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
+			$('#rate_container .ratephoto img').bind(clickEvent, function(ev) {
+				var rating = parseInt($(ev.target).parent().attr('class').split('_')[1])
+				wine.util.handleRatingClick(rating, $('#rate'));
+				state.currentPhoto.set('rating', rating);
+				addSaveButton();
 			});
 			if (state.currentPhoto.get('rating')) {
-				handleRatingClick(state.currentPhoto.get('rating'));
+				wine.util.handleRatingClick(state.currentPhoto.get('rating'), $('#rate'));
+				addSaveButton();
 			}
 		});
 		return this;
@@ -255,21 +261,47 @@ wine.views.Rate = Backbone.View.extend({
 wine.views.List = Backbone.View.extend({
 	tagName: "div",
 	id: "list",
+	template: '<div class="step left listenactive"><img class="detail_icon" /><div class="image_wrapper"><img src="{{url}}"></div><div class="title">{{url}}</div><div class="ratephoto">{{rating}}</div></div>',
 	render: function() {
 		var el = this.el;
 		var obj = { "list": wine.photos.toJSON() }; 
-		var output = Mustache.render('{{#list}}<div class="step left listenactive">{{url}}</div>{{/list}}', obj);
+		var output = Mustache.render('{{#list}}'+this.template+'{{/list}}', obj);
 		$(el).html(output);
 		$('#list_container').append(el);
+		this.displayImages($('.ratephoto', el));
 		return this;
 	},
 	add: function(photo) {
 		var el = this.el;
-		$(el).prepend('<div class="step left listenactive">'+photo.get('url')+'</div>');
+		$(el).prepend(Mustache.render(this.template, photo.toJSON()));
+		this.displayImages($('.ratephoto', el).first());
+		
+	},
+	displayImages: function(items) {
+		var el = this.el;
+		forge.tools.getURL('img/sprite.gif', function(src) {
+			$(items).each(function(idx, item) {
+				var rating = parseInt($(item).text());
+				$(item).html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
+				fake_active(item);
+				wine.util.handleRatingClick(rating, $(item));
+			});
+		});
+		forge.tools.getURL('img/detail_disclosure.jpg', function(src) {
+			$('.detail_icon', el).each(function(idx, item) {
+				$(item).attr('src', src);
+			});
+		});
 	},
 	show: function () {
 		$('#rate_container').hide();
 		$('#list_container').show();
+		forge.topbar.addButton({
+			text: 'Add',
+			position: 'right'
+		}, function() {
+			wine.router.rateTab();
+		});
 	}
 });
 
