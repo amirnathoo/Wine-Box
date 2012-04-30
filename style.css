@@ -87,7 +87,6 @@ div.center {
 
 div.left{
 	text-align: left;
-	padding-left: 8px;
 }
 
 /* ratings widget */
@@ -156,4 +155,9 @@ div.left{
 img.detail_icon {
 	float: right;
 	padding: 10px 8px;
+}
+
+img.detail {
+	margin: 3px 0 0 0;
+	width: 100%;
 }
