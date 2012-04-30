@@ -148,8 +148,11 @@ div.left{
 	text-decoration:none;
 	display: inline-block;
 	margin: 4px 0px 0px 8px;
-	width: 75%;
 	overflow: hidden;
+}
+
+#list .title {
+	width: 75%;
 }
 
 img.detail_icon {

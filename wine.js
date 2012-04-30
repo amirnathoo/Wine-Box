@@ -138,6 +138,36 @@ wine.util = {
 				$(el).addClass('no_star');
 			}
 		});
+	},
+	getLocation: function(coords, timestamp) {
+		forge.request.ajax({
+			url: "http://maps.googleapis.com/maps/api/geocode/json?latlng="+coords.latitude+","+coords.longitude+"&sensor=true",
+			dataType: "json",
+			success: function(response) {
+				try {
+					var photo = wine.photos.filter(function(item) {
+						return item.get('timestamp') == timestamp;
+					})[0];
+					if (photo) {
+						photo.set('location', response.results[0].formatted_address);
+						$('#_'+timestamp+' .title').html(photo.get('location'));
+					} else {
+						forge.logging.log('No photo with timestamp: '+timestamp);
+					}
+				} catch(e) {
+					forge.logging.log('--- Exception getting location --- ');
+					forge.logging.log(e);
+					forge.logging.log('--- Photo:');
+					forge.logging.log(photo);
+					forge.logging.log('--- Response:');
+					forge.logging.log(response);
+				}
+			},
+			error: function(response) {
+				forge.logging.log('--- Error getting location, response:');
+				forge.logging.log(response);
+			}
+		});
 	}
 }
 
@@ -194,12 +224,12 @@ wine.views.Picture = Backbone.View.extend({
 		forge.file.getImage({width: 500, height: 500}, function (file) {
 			forge.file.imageURL(file, function (url) {
 				forge.geolocation.getCurrentPosition(function(position) {
+					var timestamp = new Date().getTime()
 					state.currentPhoto = new wine.models.Photo({
 						url: url,
-						timestamp: new Date().getTime(),
+						timestamp: timestamp,
 						position: position.coords
 					});
-					self.selImage = file;
 					wine.router.rate();
 				});
 			});
@@ -251,11 +281,13 @@ wine.views.Rate = Backbone.View.extend({
 		}
 		
 		forge.tools.getURL('img/sprite.gif', function(src) {
-			$('#rate_container .ratephoto', el).bind(clickEvent, this.rate);
+			$('#rate_container .ratephoto').unbind(clickEvent, this.rate);
 			$('#rate_container .ratephoto').removeClass('listenactive');
 			$('#rate_container .ratephoto').html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
 			$('#rate_container .ratephoto img').bind(clickEvent, function(ev) {
+				forge.logging.log('... Set rating');
 				var rating = parseInt($(ev.target).parent().attr('class').split('_')[1])
+				forge.logging.log(rating);
 				wine.util.handleRatingClick(rating, $('#rate'));
 				state.currentPhoto.set('rating', rating);
 				addSaveButton();
@@ -272,7 +304,7 @@ wine.views.Rate = Backbone.View.extend({
 wine.views.List = Backbone.View.extend({
 	tagName: "div",
 	id: "list",
-	template: '<div class="step left listenactive"><img class="detail_icon" /><div class="image_wrapper"><img src="{{url}}"></div><div class="title">{{url}}</div><div class="ratephoto">{{rating}}</div></div>',
+	template: '<div id="_{{timestamp}}" class="step left listenactive"><img class="detail_icon" /><div class="image_wrapper"><img src="{{url}}"></div><div class="title">{{location}}</div><div class="ratephoto">{{rating}}</div></div>',
 	render: function() {
 		var el = this.el;
 		var obj = { "list": wine.photos.toJSON() }; 
@@ -318,6 +350,12 @@ wine.views.List = Backbone.View.extend({
 		}, function() {
 			wine.router.rateTab();
 		});
+		wine.photos.forEach(function(item) {
+			if (!item.has('location')) {
+				forge.logging.log('... Getting location');
+				wine.util.getLocation(item.get('position'), item.get('timestamp'));
+			}
+		});
 	}
 });
 
@@ -327,9 +365,10 @@ wine.views.Detail = Backbone.View.extend({
 	render: function(idx) {
 		var el = this.el;
 		var src = wine.photos.at(idx).get('url');
-		$(el).html(Mustache.render('<div class="step left listenactive"><div class="title">{{url}}</div><div class="ratephoto">{{rating}}</div></div>', {
+		$(el).html(Mustache.render('<div id="_{{timestamp}}" class="step left listenactive"><div class="title">{{location}}</div><div class="ratephoto">{{rating}}</div></div>', {
 			url: src,
-			rating: wine.photos.at(idx).get('rating')
+			rating: wine.photos.at(idx).get('rating'),
+			location: wine.photos.at(idx).get('location')
 		}));
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$('.ratephoto', el).each(function(idx, item) {
