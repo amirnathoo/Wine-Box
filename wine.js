@@ -4,7 +4,8 @@ forge.debug = true;
 var state = {
 	currentPhoto: null,
 	rateButton: null,
-	listButton: null
+	listButton: null,
+	currentCoords: null
 }
 
 // Organisation object
@@ -14,10 +15,6 @@ var wine = {
 	models: {},
 	collections: {}
 };
-
-//Style top bar and tab bar
-forge.topbar.setTint([88,22,43,255]);
-forge.tabbar.setActiveTint([88,22,43,255]);
 
 //Fake support of :active on Android
 var fake_active = function(el) {
@@ -29,37 +26,6 @@ var fake_active = function(el) {
 		});
 	}
 }
-
-var starterButton = forge.tabbar.addButton({
-	text: "Rate Wine",
-	icon: "img/star.png",
-	index: 0
-}, function (button) {
-	state.rateButton = button;
-	button.onPressed.addListener(function () {
-		wine.router.rateTab();
-	});
-	
-	// Initialise app
-	forge.logging.log('Initializing...')
-	state.list = new wine.views.List();
-	state.list.render();
-	forge.logging.log('Pre-rendered wine list');
-	wine.router.rateTab();
-	Backbone.history.start();
-	forge.logging.log('... completed initialization');
-});
-
-var mainButton = forge.tabbar.addButton({
-	text: "Wine List",
-	icon: "img/bottle.png",
-	index: 1
-}, function (button) {
-	state.listButton = button;
-	button.onPressed.addListener(function () {
-		wine.router.listTab();
-	});
-});
 
 // Setup "sensible" click/touch handling
 var clickEvent = 'ontouchend' in document.documentElement ? 'tap' : 'click';
@@ -80,6 +46,46 @@ if (clickEvent == 'tap') {
 		e.stopPropagation();
 	});
 }
+
+//Style top bar and tab bar
+forge.topbar.setTint([88,22,43,255]);
+forge.tabbar.setActiveTint([88,22,43,255]);
+
+var starterButton = forge.tabbar.addButton({
+	text: "Rate Wine",
+	icon: "img/star.png",
+	index: 0
+}, function (button) {
+	state.rateButton = button;
+	button.onPressed.addListener(function () {
+		wine.router.rateTab();
+	});
+	
+	// Initialise app
+	wine.util.initialize();
+});
+
+var mainButton = forge.tabbar.addButton({
+	text: "Wine List",
+	icon: "img/bottle.png",
+	index: 1
+}, function (button) {
+	state.listButton = button;
+	button.onPressed.addListener(function () {
+		wine.router.listTab();
+	});
+});
+
+var mapButton = forge.tabbar.addButton({
+	text: "Wine Map",
+	icon: "img/map.png",
+	index: 2
+}, function (button) {
+	state.mapButton = button;
+	button.onPressed.addListener(function () {
+		wine.router.mapTab();
+	});
+});
 
 // Router
 wine.types.Router = Backbone.Router.extend({
@@ -104,6 +110,12 @@ wine.types.Router = Backbone.Router.extend({
 		forge.topbar.removeButtons();
 		state.list.show();
 	},
+	mapTab: function() {
+		state.mapButton.setActive();
+		forge.topbar.setTitle("Wine Map");
+		forge.topbar.removeButtons();
+		state.map.show();
+	},
 	picture: function () {
 		forge.topbar.removeButtons();
 		state.currentPhoto = null;
@@ -126,6 +138,18 @@ wine.router = new wine.types.Router();
 
 // Functions
 wine.util = {
+	initialize: function() {
+		forge.logging.log('Initializing...')
+		state.list = new wine.views.List();
+		state.list.render();
+		forge.logging.log('Pre-rendered wine list');
+		state.map = new wine.views.Map();
+		state.map.render();
+		forge.logging.log('Pre-rendered map');
+		wine.router.rateTab();
+		Backbone.history.start();
+		forge.logging.log('... completed initialization');
+	},
 	disclosure_indicator: function(el) {
 		forge.tools.getURL('img/disclosure_indicator.png', function(src) {
 			$('img.icon', el).attr('src', src);
@@ -211,8 +235,8 @@ wine.views.Picture = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
+		$('.container').hide();
 		$('#rate_container').show();
-		$('#list_container').hide();
 		$('#picture').remove();
 		$('#rate').remove();
 		$('#detail').remove();
@@ -224,11 +248,14 @@ wine.views.Picture = Backbone.View.extend({
 		forge.file.getImage({width: 500, height: 500}, function (file) {
 			forge.file.imageURL(file, function (url) {
 				forge.geolocation.getCurrentPosition(function(position) {
+					state.currentCoords = position.coords;
+					forge.logging.log('Set current position:');
+					forge.logging.log(state.currentCoords);
 					var timestamp = new Date().getTime()
 					state.currentPhoto = new wine.models.Photo({
 						url: url,
 						timestamp: timestamp,
-						position: position.coords
+						position: state.currentCoords
 					});
 					wine.router.rate();
 				});
@@ -261,8 +288,8 @@ wine.views.Rate = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
+		$('.container').hide();
 		$('#rate_container').show();
-		$('#list_container').hide();
 		$('#picture').remove();
 		$('#rate').remove();
 		$('#detail').remove();
@@ -340,7 +367,7 @@ wine.views.List = Backbone.View.extend({
 		});
 	},
 	show: function () {
-		$('#rate_container').hide();
+		/*$('.container').hide();
 		$('#list_container').show();
 		$('#list').show();
 		$('#detail').remove();
@@ -355,7 +382,7 @@ wine.views.List = Backbone.View.extend({
 				forge.logging.log('... Getting location');
 				wine.util.getLocation(item.get('position'), item.get('timestamp'));
 			}
-		});
+		});*/
 	}
 });
 
@@ -394,4 +421,39 @@ wine.views.Detail = Backbone.View.extend({
 	}
 });
 
-
+wine.views.Map = Backbone.View.extend({
+	tagName: "div",
+	id: "map",
+	gmap: null,
+	render: function(idx) {
+		var el = this.el;
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyAlFSCee70OJOiD7k-fz8e6ywXVVIkWErU&sensor=true&callback=state.map.initMap";
+		document.body.appendChild(script);
+		$('#map_container').empty().append(el);
+		return this;
+	},
+	initMap: function() {
+		forge.logging.log('... Initializing map');
+		forge.geolocation.getCurrentPosition(function(position) {
+			state.currentCoords = position.coords;
+			forge.logging.log('Set current position:');
+			forge.logging.log(state.currentCoords);
+			var myOptions = {
+				zoom: 8,
+				center: new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true),
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			}
+			state.map.gmap = new google.maps.Map(document.getElementById("map"), myOptions);
+			forge.logging.log('Created map ...');
+		});
+	},
+	show: function () {
+		$('.container').hide();
+		$('#map_container').show();
+		$('#detail').remove();
+		google.maps.event.trigger(state.map.gmap, 'resize');
+		state.map.gmap.setCenter(new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true));
+	}
+});
