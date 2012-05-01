@@ -5,7 +5,8 @@ var state = {
 	currentPhoto: null,
 	rateButton: null,
 	listButton: null,
-	currentCoords: null
+	currentCoords: null,
+	currentMarker: null
 }
 
 // Organisation object
@@ -367,7 +368,7 @@ wine.views.List = Backbone.View.extend({
 		});
 	},
 	show: function () {
-		/*$('.container').hide();
+		$('.container').hide();
 		$('#list_container').show();
 		$('#list').show();
 		$('#detail').remove();
@@ -382,7 +383,7 @@ wine.views.List = Backbone.View.extend({
 				forge.logging.log('... Getting location');
 				wine.util.getLocation(item.get('position'), item.get('timestamp'));
 			}
-		});*/
+		});
 	}
 });
 
@@ -431,21 +432,31 @@ wine.views.Map = Backbone.View.extend({
 		script.type = "text/javascript";
 		script.src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyAlFSCee70OJOiD7k-fz8e6ywXVVIkWErU&sensor=true&callback=state.map.initMap";
 		document.body.appendChild(script);
-		$('#map_container').empty().append(el);
+		$('#map_container').append(el);
 		return this;
 	},
 	initMap: function() {
 		forge.logging.log('... Initializing map');
 		forge.geolocation.getCurrentPosition(function(position) {
+			$(this.el).empty();
 			state.currentCoords = position.coords;
 			forge.logging.log('Set current position:');
 			forge.logging.log(state.currentCoords);
+			var latLng = new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true);
 			var myOptions = {
-				zoom: 8,
-				center: new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true),
+				zoom: 15,
+				center: latLng,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			}
-			state.map.gmap = new google.maps.Map(document.getElementById("map"), myOptions);
+			state.map.gmap = new google.maps.Map(document.getElementById('map'), myOptions);
+			forge.tools.getURL('img/blue-pin.png', function(src) {
+				state.currentMarker = new google.maps.Marker({
+					position: latLng,
+					title: "Current Position",
+					icon: src,
+					map: state.map.gmap
+				});
+			});
 			forge.logging.log('Created map ...');
 		});
 	},
@@ -453,7 +464,14 @@ wine.views.Map = Backbone.View.extend({
 		$('.container').hide();
 		$('#map_container').show();
 		$('#detail').remove();
-		google.maps.event.trigger(state.map.gmap, 'resize');
-		state.map.gmap.setCenter(new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true));
+		if (state.map.gmap) {
+			google.maps.event.trigger(state.map.gmap, 'resize');
+			var latLng = new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true);
+			state.map.gmap.setCenter(latLng);
+			state.currentMarker.setPosition(latLng);
+		} else {
+			this.initMap();
+			$('#map').html('<div class="title">Loading...</div>');
+		}
 	}
 });
