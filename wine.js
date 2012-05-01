@@ -6,7 +6,8 @@ var state = {
 	rateButton: null,
 	listButton: null,
 	currentCoords: null,
-	currentMarker: null
+	currentMarker: null,
+	item: null
 }
 
 // Organisation object
@@ -111,11 +112,11 @@ wine.types.Router = Backbone.Router.extend({
 		forge.topbar.removeButtons();
 		state.list.show();
 	},
-	mapTab: function() {
+	mapTab: function(back, item) {
 		state.mapButton.setActive();
 		forge.topbar.setTitle("Wine Map");
 		forge.topbar.removeButtons();
-		state.map.show();
+		state.map.show(back, item);
 	},
 	picture: function () {
 		forge.topbar.removeButtons();
@@ -128,11 +129,11 @@ wine.types.Router = Backbone.Router.extend({
 		var page = new wine.views.Rate();
 		page.render().show();
 	},
-	detail: function(idx) {
+	detail: function(idx, back, nomap) {
 		forge.logging.log('... Showing detail for index: '+idx);
 		forge.topbar.removeButtons();
 		var page = new wine.views.Detail();
-		page.render(idx).show();
+		page.render(idx).show(back, nomap);
 	}
 });
 wine.router = new wine.types.Router();
@@ -357,7 +358,7 @@ wine.views.List = Backbone.View.extend({
 				fake_active(item);
 				wine.util.handleRatingClick(rating, $(item));
 				$(item).parent().bind(clickEvent, function() {
-					wine.router.detail(idx);
+					wine.router.detail(idx, wine.router.listTab);
 				});
 			});
 		});
@@ -372,6 +373,12 @@ wine.views.List = Backbone.View.extend({
 		$('#list_container').show();
 		$('#list').show();
 		$('#detail').remove();
+		forge.topbar.addButton({
+			text: 'Map',
+			position: 'left'
+		}, function() {
+			wine.router.mapTab(wine.router.listTab);
+		});
 		forge.topbar.addButton({
 			text: 'Add',
 			position: 'right'
@@ -392,7 +399,8 @@ wine.views.Detail = Backbone.View.extend({
 	id: "detail",
 	render: function(idx) {
 		var el = this.el;
-		var src = wine.photos.at(idx).get('url');
+		state.item = wine.photos.at(idx);
+		var src = state.item.get('url');
 		$(el).html(Mustache.render('<div id="_{{timestamp}}" class="step left listenactive"><div class="title">{{location}}</div><div class="ratephoto">{{rating}}</div></div>', {
 			url: src,
 			rating: wine.photos.at(idx).get('rating'),
@@ -408,17 +416,28 @@ wine.views.Detail = Backbone.View.extend({
 		$(el).append('<img class="detail" src="'+src+'" />');
 		return this;
 	},
-	show: function () {
+	show: function (back, nomap) {
+		$('.container').hide();
+		$('#list_container').show();
 		$('#list').hide();
 		$('#detail').remove();
 		$('#list_container').append(this.el);
-		forge.topbar.setTitle('Wine Detail')
+		forge.topbar.setTitle('Wine Detail');
+		back = back || wine.router.listTab;
 		forge.topbar.addButton({
 			text: 'Back',
 			position: 'left'
 		}, function() {
-			wine.router.listTab();
+			back();
 		});
+		if (!nomap) {
+			forge.topbar.addButton({
+				text: 'Map',
+				position: 'right'
+			}, function() {
+				wine.router.mapTab(null, state.item)
+			});
+		}
 	}
 });
 
@@ -454,7 +473,8 @@ wine.views.Map = Backbone.View.extend({
 					position: latLng,
 					title: "Current Position",
 					icon: src,
-					map: state.map.gmap
+					map: state.map.gmap,
+					zIndex: -1
 				});
 			});
 			wine.photos.each(state.map.add);
@@ -463,23 +483,48 @@ wine.views.Map = Backbone.View.extend({
 	},
 	add: function(item) {
 		var latLng = new google.maps.LatLng(item.get('position').latitude, item.get('position').longitude, true);
-		new google.maps.Marker({
+		var marker = new google.maps.Marker({
 			position: latLng,
-			map: state.map.gmap
+			map: state.map.gmap,
+			zIndex: 1
+		});
+		var idx = wine.photos.indexOf(item)
+		google.maps.event.addListener(marker, 'click', function() {
+			wine.router.detail(idx, function() {
+				wine.router.mapTab();
+			}, true);
 		});
 	},
-	show: function () {
+	show: function(back, item) {
 		$('.container').hide();
 		$('#map_container').show();
 		$('#detail').remove();
 		if (state.map.gmap) {
 			google.maps.event.trigger(state.map.gmap, 'resize');
-			var latLng = new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true);
-			state.map.gmap.setCenter(latLng);
+			if (item) {
+				var latLng = new google.maps.LatLng(item.get('position').latitude, item.get('position').longitude, true);
+				state.map.gmap.setCenter(latLng);
+			} else {
+				var latLng = new google.maps.LatLng(state.currentCoords.latitude, state.currentCoords.longitude, true);
+				state.map.gmap.setCenter(latLng);
+			}
 			state.currentMarker.setPosition(latLng);
 		} else {
 			this.initMap();
 			$('#map').html('<div class="title">Loading...</div>');
+		}
+		if (item) {
+			forge.topbar.addButton({
+				text: 'Back',
+				position: 'left'
+			}, function() {
+				wine.router.detail(wine.photos.indexOf(item));
+			});
+		} else if (back) {
+			forge.topbar.addButton({
+				text: 'Back',
+				position: 'left'
+			}, back);
 		}
 	}
 });
