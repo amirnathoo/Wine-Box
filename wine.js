@@ -346,7 +346,7 @@ wine.views.List = Backbone.View.extend({
 		var el = this.el;
 		$(el).prepend(Mustache.render(this.template, photo.toJSON()));
 		this.displayItem($('.ratephoto', el).first());
-		
+		state.map.add(photo);
 	},
 	displayItem: function(items) {
 		var el = this.el;
@@ -457,7 +457,15 @@ wine.views.Map = Backbone.View.extend({
 					map: state.map.gmap
 				});
 			});
+			wine.photos.each(state.map.add);
 			forge.logging.log('Created map ...');
+		});
+	},
+	add: function(item) {
+		var latLng = new google.maps.LatLng(item.get('position').latitude, item.get('position').longitude, true);
+		new google.maps.Marker({
+			position: latLng,
+			map: state.map.gmap
 		});
 	},
 	show: function () {
