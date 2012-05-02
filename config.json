@@ -4,7 +4,18 @@
 	"description": "Keep track of which wines you like", 
 	"modules": {
 		"geolocation": true, 
-		"icons": {},  
+		"icons": {
+			"android": {
+				"36": "img/icons/36x36.png",
+				"48": "img/icons/48x48.png",
+				"72": "img/icons/72x72.png"
+			},
+			"ios": {
+				"57": "img/icons/57x57.png",
+				"72": "img/icons/72x72.png",
+				"114": "img/icons/114x114.png"
+			}
+		},  
 		"logging": {
 			"level": "WARNING"
 		}, 

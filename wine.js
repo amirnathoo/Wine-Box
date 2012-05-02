@@ -1,4 +1,4 @@
-forge.debug = true;
+//forge.debug = true;
 
 // Current state
 var state = {
