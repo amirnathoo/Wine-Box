@@ -17,7 +17,7 @@
 			}
 		},  
 		"logging": {
-			"level": "WARNING"
+			"level": "INFO"
 		}, 
 		"prefs": true, 
 		"request": {

@@ -225,7 +225,7 @@ wine.views.Picture = Backbone.View.extend({
 		$(el).html('<div id="choosephoto" class="step center listenactive"><div class="label">1.</div><div class="instruction">Take picture of label</div><img class="icon"></img></div>');
 		wine.util.disclosure_indicator(el);
 		if (wine.photos.length) {
-			var src = wine.photos.at(wine.photos.length-1).get('url');
+			var src = wine.photos.at(0).get('url');
 			$(el).attr('style', 'width:100%;height:100%;background-image:url('+src+');background-size:cover;');
 		} else {
 			forge.tools.getURL('img/wine.jpg', function(src) {
@@ -249,6 +249,7 @@ wine.views.Picture = Backbone.View.extend({
 		self.selImage = undefined;
 		forge.file.getImage({width: 500, height: 500}, function (file) {
 			forge.file.imageURL(file, function (url) {
+				forge.logging.log('Got photo with url: '+url);
 				forge.geolocation.getCurrentPosition(function(position) {
 					state.currentCoords = position.coords;
 					forge.logging.log('Set current position:');
@@ -357,8 +358,9 @@ wine.views.List = Backbone.View.extend({
 				$(item).html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
 				fake_active(item);
 				wine.util.handleRatingClick(rating, $(item));
+				var photo = wine.photos.at(idx);
 				$(item).parent().bind(clickEvent, function() {
-					wine.router.detail(idx, wine.router.listTab);
+					wine.router.detail(wine.photos.indexOf(photo), wine.router.listTab);
 				});
 			});
 		});
