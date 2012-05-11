@@ -1,5 +1,3 @@
-//forge.debug = true;
-
 // Current state
 var state = {
 	currentPhoto: null,

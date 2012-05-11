@@ -25,7 +25,10 @@
 		}, 
 		"tools": true,
 		"topbar": true,
-		"tabbar": true
+		"tabbar": true,
+		"package_names": {
+			"ios": "com.amirnathoo.winebox"
+		}
 	}, 
 	"name": "Wine Box", 
 	"platform_version": "v1.3", 
