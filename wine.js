@@ -1,3 +1,5 @@
+forge.debug = true;
+
 // Current state
 var state = {
 	currentPhoto: null,
@@ -62,7 +64,24 @@ var starterButton = forge.tabbar.addButton({
 	});
 	
 	// Initialise app
-	wine.util.initialize();
+	forge.prefs.keys(function(array) {
+		if ($.inArray('wine', array) > -1) {
+			forge.prefs.get('wine', function(photos) {
+				wine.photos = new wine.collections.Photos(photos);
+				wine.util.initialize();
+			});
+		} else {
+			/* handle migration from v0.1 */
+			if (localStorage.wine) {
+				wine.photos = new wine.collections.Photos(JSON.parse(localStoreage.wine));
+				forge.prefs.set('wine', wine.photos.toArray());
+				localStorage.clear();
+			} else {
+				wine.photos = new wine.collections.Photos();
+			}
+			wine.util.initialize();
+		}
+	});
 });
 
 var mainButton = forge.tabbar.addButton({
@@ -140,6 +159,10 @@ wine.router = new wine.types.Router();
 wine.util = {
 	initialize: function() {
 		forge.logging.log('Initializing...')
+		wine.photos.on("add", function(photo) {
+			state.list.add(photo);
+			forge.prefs.set('wine', wine.photos.toArray());
+		});
 		state.list = new wine.views.List();
 		state.list.render();
 		forge.logging.log('Pre-rendered wine list');
@@ -205,13 +228,6 @@ wine.collections.Photos = Backbone.Collection.extend({
 	comparator: function (model) {
 		return -model.get('timestamp');
 	}
-});
-wine.photos = (localStorage.photos)? 
-	new wine.collections.Photos(JSON.parse(localStorage.photos)): 
-	new wine.collections.Photos();
-wine.photos.on("add", function(photo) {
-	state.list.add(photo);
-	localStorage.photos = JSON.stringify(wine.photos.toArray());
 });
 
 // Views
