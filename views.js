@@ -4,14 +4,14 @@ wine.views.Picture = Backbone.View.extend({
 	id: "picture",
 	render: function() {
 		var el = this.el;
-		$(el).html('<div id="choosephoto" class="step center listenactive"><div class="label">1.</div><div class="instruction">Take picture of label</div><img class="icon"></img></div>');
+		$(el).html($('#tmpl-picture').text());
 		wine.util.disclosure_indicator(el);
 		if (wine.photos.length) {
 			var src = wine.photos.at(0).get('url');
-			$(el).attr('style', 'width:100%;height:100%;background-image:url('+src+');background-size:cover;');
+			$(el).css('background-image', 'url('+src+')');
 		} else {
 			forge.tools.getURL('img/wine.jpg', function(src) {
-				$(el).attr('style', 'width:100%;height:100%;background-image:url('+src+');background-size:cover;');
+				$(el).css('background-image', 'url('+src+')');
 			});
 		}
 		$('#choosephoto', el).bind(clickEvent, this.choose);
@@ -19,12 +19,14 @@ wine.views.Picture = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
-		$('.container').hide();
+		wine.util.resetCurrentView(this);
 		$('#rate_container').show();
-		$('#picture').remove();
-		$('#rate').remove();
-		$('#detail').remove();
 		$('#rate_container').append(this.el);
+	},
+	close: function() {
+		$('#rate_container').hide();
+		$('#picture').remove();
+		this.remove();
 	},
 	choose: function () {
 		var self = this;
@@ -43,6 +45,7 @@ wine.views.Picture = Backbone.View.extend({
 						position: state.get('currentCoords')
 					}));
 					wine.router.navigate('rate', { trigger: true });
+					$('#picture').remove();
 				});
 			});
 		});
@@ -53,19 +56,13 @@ wine.views.Rate = Backbone.View.extend({
 	tagName: "div",
 	id: "rate",
 	render: function() {
-		forge.topbar.addButton({
-			text: 'Back',
-			position: 'left'
-		}, function() {
-			wine.router.navigate('picture', { trigger: true });
-		});
 		var el = this.el;
-		$(el).html('<div class="ratephoto step center listenactive"></div>');
-		$(el).attr('style', 'width:100%;height:100%;background-image:url('+state.get('currentPhoto').get('url')+');background-size:cover;');
+		$(el).html($('#tmpl-rate1').text());
+		$(el).css('background-image', 'url('+state.get('currentPhoto').get('url')+')');
 		if (state.get('currentPhoto').get('rating')) {
 			this.rate();
 		} else {
-			$('.ratephoto', el).html('<div class="label">2.</div><div class="instruction">Rate wine</div><img class="icon">');
+			$('.ratephoto', el).html($('#tmpl-rate2').text());
 			wine.util.disclosure_indicator(el);
 			fake_active($('.ratephoto', el));
 			$('.ratephoto', el).bind(clickEvent, this.rate);
@@ -73,12 +70,21 @@ wine.views.Rate = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
-		$('.container').hide();
+		wine.util.resetCurrentView(this);
 		$('#rate_container').show();
-		$('#picture').remove();
-		$('#rate').remove();
-		$('#detail').remove();
 		$('#rate_container').append(this.el);
+		forge.topbar.addButton({
+			text: 'Back',
+			position: 'left',
+			type: 'back'
+		}, function() {
+			$('#rate').remove();
+		});
+	},
+	close: function() {
+		$('#rate_container').hide();
+		$('#rate').remove();
+		this.remove();
 	},
 	rate: function() {
 		function addSaveButton() {
@@ -89,13 +95,15 @@ wine.views.Rate = Backbone.View.extend({
 				wine.photos.add(state.get('currentPhoto'));
 				state.set('currentPhoto', null);
 				wine.router.navigate('listTab', { trigger: true });
+				$('#rate_container').hide();
+				$('#rate').remove();
 			});
 		}
 		
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$('#rate_container .ratephoto').unbind(clickEvent, this.rate);
 			$('#rate_container .ratephoto').removeClass('listenactive');
-			$('#rate_container .ratephoto').html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
+			$('#rate_container .ratephoto').html(Mustache.render($('#tmpl-stars').text(), { src: src }));
 			$('#rate_container .ratephoto img').bind(clickEvent, function(ev) {
 				forge.logging.log('... Set rating');
 				var rating = parseInt($(ev.target).parent().attr('class').split('_')[1])
@@ -116,11 +124,10 @@ wine.views.Rate = Backbone.View.extend({
 wine.views.List = Backbone.View.extend({
 	tagName: "div",
 	id: "list",
-	template: '<div id="_{{timestamp}}" class="step left listenactive"><img class="detail_icon" /><div class="image_wrapper"><img src="{{url}}"></div><div class="title">{{location}}</div><div class="ratephoto">{{rating}}</div></div>',
 	render: function() {
 		var el = this.el;
 		var obj = { "list": wine.photos.toJSON() }; 
-		var output = Mustache.render('{{#list}}'+this.template+'{{/list}}', obj);
+		var output = Mustache.render('{{#list}}'+$('#tmpl-list').text()+'{{/list}}', obj);
 		$(el).html(output);
 		$('#list_container').append(el);
 		this.displayItem($('.ratephoto', el));
@@ -128,7 +135,7 @@ wine.views.List = Backbone.View.extend({
 	},
 	add: function(photo) {
 		var el = this.el;
-		$(el).prepend(Mustache.render(this.template, photo.toJSON()));
+		$(el).prepend(Mustache.render($('#tmpl-list').text(), photo.toJSON()));
 		this.displayItem($('.ratephoto', el).first());
 		state.get('map').add(photo);
 	},
@@ -137,12 +144,13 @@ wine.views.List = Backbone.View.extend({
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$(items).each(function(idx, item) {
 				var rating = parseInt($(item).text());
-				$(item).html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
+				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
 				fake_active(item);
 				wine.util.handleRatingClick(rating, $(item));
 				var photo = wine.photos.at(idx);
 				$(item).parent().bind(clickEvent, function() {
 					wine.router.navigate('detail/'+wine.photos.indexOf(photo), { trigger: true });
+					$('#list').hide();
 				});
 			});
 		});
@@ -152,22 +160,29 @@ wine.views.List = Backbone.View.extend({
 			});
 		});
 	},
+	close: function() {
+		$('#list_container').hide();
+		$('#list').hide();
+	},
 	show: function () {
-		$('.container').hide();
+		wine.util.resetCurrentView(this);
 		$('#list_container').show();
 		$('#list').show();
-		$('#detail').remove();
 		forge.topbar.addButton({
 			text: 'Map',
 			position: 'left'
 		}, function() {
 			wine.router.navigate('mapTab', { trigger: true });
+			$('#list_container').hide();
+			$('#list').hide();
 		});
 		forge.topbar.addButton({
 			text: 'Add',
 			position: 'right'
 		}, function() {
 			wine.router.navigate('rateTab', { trigger: true });
+			$('#list_container').hide();
+			$('#list').hide();
 		});
 		wine.photos.forEach(function(item) {
 			if (!item.has('location')) {
@@ -186,7 +201,7 @@ wine.views.Detail = Backbone.View.extend({
 		state.set('idx', idx);
 		var item = wine.photos.at(idx);
 		var src = item.get('url');
-		$(el).html(Mustache.render('<div id="_{{timestamp}}" class="step left listenactive"><div class="title">{{location}}</div><div class="ratephoto">{{rating}}</div></div>', {
+		$(el).html(Mustache.render($('#tmpl-detail').text(), {
 			url: src,
 			rating: wine.photos.at(idx).get('rating'),
 			location: wine.photos.at(idx).get('location'),
@@ -195,7 +210,7 @@ wine.views.Detail = Backbone.View.extend({
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$('.ratephoto', el).each(function(idx, item) {
 				var rating = parseInt($(item).text());
-				$(item).html('<fieldset><div><label class="_1"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="1_5"> 1/5</label><br><label class="_2"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="2_5"> 2/5</label><br><label class="_3"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="3_5"> 3/5</label><br><label class="_4 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="4_5"> 4/5</label><br><label class="_5 no_star"><img src="'+src+'"  width="0" height="1" ><input type="radio" name="movie" value="5_5"> 5/5</label></div></fieldset>');
+				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
 				wine.util.handleRatingClick(rating, $(item));
 			});
 		});
@@ -203,24 +218,30 @@ wine.views.Detail = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
-		$('.container').hide();
+		wine.util.resetCurrentView(this);
 		$('#list_container').show();
-		$('#list').hide();
-		$('#detail').remove();
 		$('#list_container').append(this.el);
 		forge.topbar.setTitle('Wine Detail');
 		forge.topbar.addButton({
 			text: 'Back',
-			position: 'left'
+			position: 'left',
+			type: 'back'
 		}, function() {
-			history.back();
+			$('#detail').remove();
 		});
 		forge.topbar.addButton({
 			text: 'Map',
 			position: 'right'
 		}, function() {
 			wine.router.navigate('mapTab/'+state.get('idx'), { trigger: true} );
+			$('#list_container').hide();
+			$('#detail').remove();
 		});
+	},
+	close: function() {
+		$('#list_container').hide();
+		$('#detail').remove();
+		this.remove();
 	}
 });
 
@@ -276,12 +297,12 @@ wine.views.Map = Backbone.View.extend({
 		var idx = wine.photos.indexOf(item)
 		google.maps.event.addListener(marker, 'click', function() {
 			wine.router.navigate('detail/'+idx, { trigger: true });
+			$('#map_container').hide();
 		});
 	},
 	show: function(idx) {
-		$('.container').hide();
 		$('#map_container').show();
-		$('#detail').remove();
+		wine.util.resetCurrentView(this);
 		if (state.get('map').gmap) {
 			google.maps.event.trigger(state.get('map').gmap, 'resize');
 			if (idx) {
@@ -300,10 +321,14 @@ wine.views.Map = Backbone.View.extend({
 		if (idx) {
 			forge.topbar.addButton({
 				text: 'Back',
-				position: 'left'
-			}, function() { 
-				history.back();
+				position: 'left',
+				type: 'back'
+			}, function() {
+				$('#map_container').hide();
 			});
 		}
+	},
+	close: function() {
+		$('#map_container').hide();
 	}
 });

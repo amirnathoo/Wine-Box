@@ -59,6 +59,16 @@ img.icon {
 	right:0px;
 }
 
+div.container, #list {
+	display: none;
+}
+
+div#picture, div#rate {
+	width:100%;
+	height:100%;
+	background-size:cover;
+}
+
 div.step {
 	height: 50px;
 	background-color: #fff;
