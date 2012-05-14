@@ -249,7 +249,7 @@ wine.views.Map = Backbone.View.extend({
 	tagName: "div",
 	id: "map",
 	gmap: null,
-	render: function(idx) {
+	render: function() {
 		var el = this.el;
 		var script = document.createElement("script");
 		script.type = "text/javascript";
@@ -305,15 +305,15 @@ wine.views.Map = Backbone.View.extend({
 		wine.util.resetCurrentView(this);
 		if (state.get('map').gmap) {
 			google.maps.event.trigger(state.get('map').gmap, 'resize');
+			var currentLatLng = new google.maps.LatLng(state.get('currentCoords').latitude, state.get('currentCoords').longitude, true);
 			if (idx) {
 				var item = wine.photos.at(idx);
 				var latLng = new google.maps.LatLng(item.get('position').latitude, item.get('position').longitude, true);
 				state.get('map').gmap.setCenter(latLng);
 			} else {
-				var latLng = new google.maps.LatLng(state.get('currentCoords').latitude, state.get('currentCoords').longitude, true);
-				state.get('map').gmap.setCenter(latLng);
+				state.get('map').gmap.setCenter(currentLatLng);
 			}
-			state.get('currentMarker').setPosition(latLng);
+			state.get('currentMarker').setPosition(currentLatLng);
 		} else {
 			this.initMap();
 			$('#map').html('<div class="title">Loading...</div>');

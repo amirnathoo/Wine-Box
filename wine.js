@@ -50,8 +50,18 @@ var wine = {
 			state.get('map').render();
 			forge.logging.log('Pre-rendered map');
 			Backbone.history.start();
-			wine.router.navigate("rateTab", { trigger: true});
-			forge.logging.log('... completed initialization');
+			if (state.get('rateButton')) {
+				wine.router.navigate("rateTab", { trigger: true});
+				forge.logging.log('... completed initialization');
+			} else {
+				window.initInterval = setInterval(function() {
+					if (state.get('rateButton')) {
+						wine.router.navigate("rateTab", { trigger: true});
+						forge.logging.log('... completed initialization');
+						clearInterval(window.initInterval);
+					} 
+				}, 200);
+			}
 		},
 		disclosure_indicator: function(el) {
 			forge.tools.getURL('img/disclosure_indicator.png', function(src) {
