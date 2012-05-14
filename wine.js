@@ -1,5 +1,3 @@
-forge.debug = true;
-
 //Fake support of :active on Android
 var fake_active = function(el) {
 	if (forge.is.android() && $(el).hasClass('listenactive')) {
@@ -101,6 +99,13 @@ var wine = {
 		initMap: function() {
 			forge.logging.log('Google Maps API loaded');
 			state.get('map').initMap();
+		},
+		resetCurrentView: function(view) {
+			forge.topbar.removeButtons();
+			if (state.get('currentView')) {
+				state.get('currentView').close();
+			}
+			state.set('currentView', view);
 		}
 	}
 };

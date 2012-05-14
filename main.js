@@ -13,26 +13,6 @@ forge.tabbar.addButton({
 	button.onPressed.addListener(function () {
 		wine.router.navigate('rateTab', { trigger: true });
 	});
-	
-	// Initialise app
-	forge.prefs.keys(function(array) {
-		if ($.inArray('wine', array) > -1) {
-			forge.prefs.get('wine', function(photos) {
-				wine.photos = new wine.collections.Photos(photos);
-				wine.util.initialize();
-			});
-		} else {
-			/* handle migration from v0.1 */
-			if (localStorage.wine) {
-				wine.photos = new wine.collections.Photos(JSON.parse(localStoreage.wine));
-				forge.prefs.set('wine', wine.photos.toArray());
-				localStorage.clear();
-			} else {
-				wine.photos = new wine.collections.Photos();
-			}
-			wine.util.initialize();
-		}
-	});
 });
 
 forge.tabbar.addButton({
@@ -55,4 +35,24 @@ forge.tabbar.addButton({
 	button.onPressed.addListener(function () {
 		wine.router.navigate('mapTab', { trigger: true });
 	});
+});
+
+// Initialise app
+forge.prefs.keys(function(array) {
+	if ($.inArray('wine', array) > -1) {
+		forge.prefs.get('wine', function(photos) {
+			wine.photos = new wine.collections.Photos(photos);
+			wine.util.initialize();
+		});
+	} else {
+		/* handle migration from v0.1 */
+		if (localStorage.wine) {
+			wine.photos = new wine.collections.Photos(JSON.parse(localStoreage.wine));
+			forge.prefs.set('wine', wine.photos.toArray());
+			localStorage.clear();
+		} else {
+			wine.photos = new wine.collections.Photos();
+		}
+		wine.util.initialize();
+	}
 });

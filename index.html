@@ -2,16 +2,15 @@
 <html>
 <head>
 	<title>EventStream</title>
-	<script src="https://trigger.io/catalyst/target/target-script-min.js#37A8B717-030A-4557-A8F0-1D306F75ACA0"></script>
 	<script src="lib/zepto.js"></script>
 	<script src="lib/underscore.js"></script>
 	<script src="lib/mustache.js"></script>
 	<script src="lib/backbone.js"></script>
 	<script src="lib/date.js"></script>
-	<script defer src="wine.js"></script>
-	<script defer src="router.js"></script>
-	<script defer src="models.js"></script>
-	<script defer src="views.js"></script>
+	<script src="wine.js"></script>
+	<script src="router.js"></script>
+	<script src="models.js"></script>
+	<script src="views.js"></script>
 	<script defer src="main.js"></script>
 	<link rel="stylesheet" href="reset.css">
 	<link rel="stylesheet" href="style.css">
@@ -21,5 +20,66 @@
 	<div class="container" id="rate_container"></div>
 	<div class="container" id="list_container"></div>
 	<div class="container" id="map_container"></div>
+	<script id="tmpl-picture" type="text/x-mustache-tmpl">
+		<div id="choosephoto" class="step center listenactive">
+			<div class="label">1.</div>
+			<div class="instruction">Take picture of label</div>
+			<img class="icon"></img>
+		</div>
+	</script>
+	<script id="tmpl-rate1" type="text/x-mustache-tmpl">
+		<div class="ratephoto step center listenactive"></div>
+	</script>
+	<script id="tmpl-rate2" type="text/x-mustache-tmpl">
+		<div class="label">2.</div>
+		<div class="instruction">Rate wine</div>
+		<img class="icon">
+	</script>
+	<script id="tmpl-stars" type="text/x-mustache-tmpl">
+		<fieldset>
+			<div>
+				<label class="_1">
+					<img src="{{src}}"  width="0" height="1" >
+					<input type="radio" name="movie" value="1_5"> 1/5
+				</label>
+				<br>
+				<label class="_2">
+					<img src="{{src}}"  width="0" height="1" >
+					<input type="radio" name="movie" value="2_5"> 2/5
+				</label>
+				<br>
+				<label class="_3">
+					<img src="{{src}}"  width="0" height="1" >
+					<input type="radio" name="movie" value="3_5"> 3/5
+				</label>
+				<br>
+				<label class="_4 no_star">
+					<img src="{{src}}"  width="0" height="1" >
+					<input type="radio" name="movie" value="4_5"> 4/5
+				</label>
+				<br>
+				<label class="_5 no_star">
+					<img src="{{src}}"  width="0" height="1" >
+					<input type="radio" name="movie" value="5_5"> 5/5
+				</label>
+			</div>
+		</fieldset>
+	</script>
+	<script id="tmpl-list" type="text/x-mustache-tmpl">
+		<div id="_{{timestamp}}" class="step left listenactive">
+			<img class="detail_icon" />
+			<div class="image_wrapper">
+				<img src="{{url}}">
+			</div>
+			<div class="title">{{location}}</div>
+			<div class="ratephoto">{{rating}}</div>
+		</div>
+	</script>
+	<script id="tmpl-detail" type="text/x-mustache-tmpl">
+		<div id="_{{timestamp}}" class="step left listenactive">
+			<div class="title">{{location}}</div>
+			<div class="ratephoto">{{rating}}</div>
+		</div>
+	</script>
 </body>
 </html>

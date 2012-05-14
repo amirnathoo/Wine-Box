@@ -12,7 +12,6 @@ wine.types.Router = Backbone.Router.extend({
 	rateTab: function() {
 		state.get('rateButton').setActive();
 		forge.topbar.setTitle("Rate Wine");
-		forge.topbar.removeButtons();
 		if (!state.get('currentPhoto')) {
 			wine.router.navigate('picture', { trigger: true });
 		} else {
@@ -22,29 +21,24 @@ wine.types.Router = Backbone.Router.extend({
 	listTab: function() {
 		state.get('listButton').setActive();
 		forge.topbar.setTitle("Wine List");
-		forge.topbar.removeButtons();
 		state.get('list').show();
 	},
 	mapTab: function(idx) {
 		state.get('mapButton').setActive();
 		forge.topbar.setTitle("Wine Map");
-		forge.topbar.removeButtons();
 		state.get('map').show(idx);
 	},
 	picture: function () {
-		forge.topbar.removeButtons();
 		state.set('currentPhoto', null);
 		var page = new wine.views.Picture();
 		page.render().show();
 	},
 	rate: function() {
-		forge.topbar.removeButtons();
 		var page = new wine.views.Rate();
 		page.render().show();
 	},
 	detail: function(idx) {
 		forge.logging.log('... Showing detail for index: '+idx);
-		forge.topbar.removeButtons();
 		var page = new wine.views.Detail();
 		page.render(idx).show();
 	}
