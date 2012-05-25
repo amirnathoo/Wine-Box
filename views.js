@@ -3,7 +3,7 @@ wine.views.Picture = Backbone.View.extend({
 	tagName: "div",
 	id: "picture",
 	render: function() {
-		var el = this.el;
+		var el = this.el; 
 		$(el).html($('#tmpl-picture').text());
 		wine.util.disclosure_indicator(el);
 		if (wine.photos.length) {
@@ -126,20 +126,24 @@ wine.views.List = Backbone.View.extend({
 	id: "list",
 	render: function() {
 		var el = this.el;
-		var obj = { "list": wine.photos.toJSON() }; 
+		var obj = { "list": wine.photos.toJSON() };
 		var output = Mustache.render('{{#list}}'+$('#tmpl-list').text()+'{{/list}}', obj);
 		$(el).html(output);
 		$('#list_container').append(el);
-		this.displayItem($('.ratephoto', el));
+		this.display($('.ratephoto', el));
 		return this;
 	},
 	add: function(photo) {
 		var el = this.el;
 		$(el).prepend(Mustache.render($('#tmpl-list').text(), photo.toJSON()));
-		this.displayItem($('.ratephoto', el).first());
+		this.display($('.ratephoto', el).first());
 		state.get('map').add(photo);
 	},
-	displayItem: function(items) {
+	remove: function(idx) {
+		var el = this.el;
+		$('.step', el).eq(idx).remove();
+	},
+	display: function(items) {
 		var el = this.el;
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$(items).each(function(idx, item) {
@@ -154,11 +158,7 @@ wine.views.List = Backbone.View.extend({
 				});
 			});
 		});
-		forge.tools.getURL('img/detail_disclosure.jpg', function(src) {
-			$('.detail_icon', el).each(function(idx, item) {
-				$(item).attr('src', src);
-			});
-		});
+		wine.util.showDetailIcon(el);
 	},
 	close: function() {
 		$('#list_container').hide();
@@ -214,7 +214,13 @@ wine.views.Detail = Backbone.View.extend({
 				wine.util.handleRatingClick(rating, $(item));
 			});
 		});
+		wine.util.showDetailIcon(el);
 		$(el).append('<img class="detail" src="'+src+'" />');
+		$('.step', el).bind(clickEvent, function() {
+			wine.router.navigate('mapTab/'+state.get('idx'), { trigger: true });
+			$('#list_container').hide();
+			$('#detail').remove();
+		});
 		return this;
 	},
 	show: function () {
@@ -230,12 +236,14 @@ wine.views.Detail = Backbone.View.extend({
 			$('#detail').remove();
 		});
 		forge.topbar.addButton({
-			text: 'Map',
+			text: 'Delete',
 			position: 'right'
 		}, function() {
-			wine.router.navigate('mapTab/'+state.get('idx'), { trigger: true} );
-			$('#list_container').hide();
-			$('#detail').remove();
+			if (confirm("Confirm delete?")) {
+				wine.photos.remove(wine.photos.at(state.get('idx')));
+				wine.router.navigate('listTab', { trigger: true });
+				$('#detail').remove();
+			}
 		});
 	},
 	close: function() {

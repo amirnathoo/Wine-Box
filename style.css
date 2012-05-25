@@ -165,6 +165,10 @@ div.left{
 	width: 75%;
 }
 
+#detail .title {
+	width: 85%;
+}
+
 img.detail_icon {
 	float: right;
 	padding: 10px 8px;

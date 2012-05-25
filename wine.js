@@ -1,3 +1,5 @@
+forge.enableDebug();
+
 //Fake support of :active on Android
 var fake_active = function(el) {
 	if (forge.is.android() && $(el).hasClass('listenactive')) {
@@ -43,7 +45,11 @@ var wine = {
 				state.get('list').add(photo);
 				forge.prefs.set('wine', wine.photos.toArray());
 			});
-			state.set('list', new wine.views.List());
+			wine.photos.on("remove", function() {
+				state.get('list').remove(state.get('idx'));
+				forge.prefs.set('wine', wine.photos.toArray());
+			});
+			state.set('list', new wine.views.List());	
 			state.get('list').render();
 			forge.logging.log('Pre-rendered wine list');
 			state.set('map', new wine.views.Map());
@@ -116,6 +122,13 @@ var wine = {
 				state.get('currentView').close();
 			}
 			state.set('currentView', view);
+		},
+		showDetailIcon: function(el) {
+			forge.tools.getURL('img/detail_disclosure.jpg', function(src) {
+				$('.detail_icon', el).each(function(idx, item) {
+					$(item).attr('src', src);
+				});
+			});
 		}
 	}
 };
