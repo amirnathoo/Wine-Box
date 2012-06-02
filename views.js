@@ -140,9 +140,17 @@ wine.views.List = Backbone.View.extend({
 		this.display($('.ratephoto', el).first());
 		state.get('map').add(photo);
 	},
-	remove: function(idx) {
+	removeByIndex: function(idx) {
 		var el = this.el;
 		$('.step', el).eq(idx).remove();
+	},
+	removeByTimestamp: function(timestamp) {
+		var el = this.el;
+		$('#_'+timestamp, el).remove();
+	},
+	exists: function(timestamp) {
+		var el = this.el;
+		return ($('#_'+timestamp, el).length? true: false);
 	},
 	display: function(items) {
 		var el = this.el;
