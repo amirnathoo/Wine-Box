@@ -37,6 +37,8 @@ forge.tabbar.addButton({
 	});
 });
 
+$ = $ || Zepto;
+
 // Initialise app
 forge.prefs.keys(function(array) {
 	if ($.inArray('wine', array) > -1) {

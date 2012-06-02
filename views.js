@@ -44,8 +44,8 @@ wine.views.Picture = Backbone.View.extend({
 						timestamp: timestamp,
 						position: state.get('currentCoords')
 					}));
-					wine.router.navigate('rate', { trigger: true });
-					$('#picture').remove();
+					var page = new wine.views.Rate();
+					page.render().show();
 				});
 			});
 		});
@@ -75,10 +75,11 @@ wine.views.Rate = Backbone.View.extend({
 		$('#rate_container').append(this.el);
 		forge.topbar.addButton({
 			text: 'Back',
-			position: 'left',
-			type: 'back'
+			position: 'left'
 		}, function() {
-			$('#rate').remove();
+			state.set('currentPhoto', null);
+			var page = new wine.views.Picture();
+			page.render().show();
 		});
 	},
 	close: function() {
@@ -149,7 +150,7 @@ wine.views.List = Backbone.View.extend({
 			$(items).each(function(idx, item) {
 				var rating = parseInt($(item).text());
 				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
-				fake_active(item);
+				fake_active($(item).parent());
 				wine.util.handleRatingClick(rating, $(item));
 				var photo = wine.photos.at(idx);
 				$(item).parent().bind(clickEvent, function() {
@@ -207,6 +208,7 @@ wine.views.Detail = Backbone.View.extend({
 			location: wine.photos.at(idx).get('location'),
 			timestamp: wine.photos.at(idx).get('timestamp')
 		}));
+		fake_active($('.listenactive', el));
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$('.ratephoto', el).each(function(idx, item) {
 				var rating = parseInt($(item).text());

@@ -38,12 +38,22 @@ var wine = {
 	models: {},
 	collections: {},
 	router: null,
+	firebase: null,
 	util: {
 		initialize: function() {
 			forge.logging.log('Initializing...')
 			wine.photos.on("add", function(photo) {
 				state.get('list').add(photo);
 				forge.prefs.set('wine', wine.photos.toArray());
+				/*if (!wine.firebase && Firebase) {
+					forge.logging.log('Initializing Firebase');
+					wine.firebase = new Firebase('http://gamma.firebase.com/winebox');
+				}
+				if (wine.firebase) {
+					forge.logging.log('Saving to firebase');
+					forge.logging.log(photo.toJSON());
+					wine.firebase.push(photo.toJSON());
+				}*/
 			});
 			wine.photos.on("remove", function() {
 				state.get('list').remove(state.get('idx'));
@@ -56,17 +66,22 @@ var wine = {
 			state.get('map').render();
 			forge.logging.log('Pre-rendered map');
 			Backbone.history.start();
-			if (state.get('rateButton')) {
-				wine.router.navigate("rateTab", { trigger: true});
-				forge.logging.log('... completed initialization');
-			} else {
-				window.initInterval = setInterval(function() {
-					if (state.get('rateButton')) {
-						wine.router.navigate("rateTab", { trigger: true});
-						forge.logging.log('... completed initialization');
-						clearInterval(window.initInterval);
-					} 
-				}, 200);
+			if (forge.is.mobile()) {
+				if (state.get('rateButton')) {
+					wine.router.navigate("rateTab", { trigger: true});
+					forge.logging.log('... completed initialization');
+				} else {
+					window.initInterval = setInterval(function() {
+						if (state.get('rateButton')) {
+							wine.router.navigate("rateTab", { trigger: true});
+							forge.logging.log('... completed initialization');
+							clearInterval(window.initInterval);
+						} 
+					}, 200);
+				}
+			}
+			if (forge.is.web()) {
+				wine.router.navigate("listTab", { trigger: true});
 			}
 		},
 		disclosure_indicator: function(el) {

@@ -10,32 +10,24 @@ wine.types.Router = Backbone.Router.extend({
 		"detail/:idx": "detail"
 	},
 	rateTab: function() {
-		state.get('rateButton').setActive();
-		forge.topbar.setTitle("Rate Wine");
-		if (!state.get('currentPhoto')) {
-			wine.router.navigate('picture', { trigger: true });
+		forge.is.mobile() && state.get('rateButton').setActive();
+		forge.is.mobile() && forge.topbar.setTitle("Rate Wine");
+		if (state.get('currentPhoto')) {
+			var page = new wine.views.Rate();
 		} else {
-			wine.router.navigate('rate', { trigger: true });
+			var page = new wine.views.Picture();
 		}
+		page.render().show();
 	},
 	listTab: function() {
-		state.get('listButton').setActive();
-		forge.topbar.setTitle("Wine List");
+		forge.is.mobile() &&  state.get('listButton').setActive();
+		forge.is.mobile() &&  forge.topbar.setTitle("Wine List");
 		state.get('list').show();
 	},
 	mapTab: function(idx) {
-		state.get('mapButton').setActive();
-		forge.topbar.setTitle("Wine Map");
+		forge.is.mobile() &&  state.get('mapButton').setActive();
+		forge.is.mobile() &&  forge.topbar.setTitle("Wine Map");
 		state.get('map').show(idx);
-	},
-	picture: function () {
-		state.set('currentPhoto', null);
-		var page = new wine.views.Picture();
-		page.render().show();
-	},
-	rate: function() {
-		var page = new wine.views.Rate();
-		page.render().show();
 	},
 	detail: function(idx) {
 		forge.logging.log('... Showing detail for index: '+idx);

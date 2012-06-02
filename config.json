@@ -3,34 +3,37 @@
 	"config_version": "2", 
 	"description": "Keep track of which wines you like", 
 	"modules": {
+		"file": true, 
 		"geolocation": true, 
 		"icons": {
 			"android": {
-				"36": "img/icons/36x36.png",
-				"48": "img/icons/48x48.png",
+				"36": "img/icons/36x36.png", 
+				"48": "img/icons/48x48.png", 
 				"72": "img/icons/72x72.png"
-			},
+			}, 
 			"ios": {
-				"57": "img/icons/57x57.png",
-				"72": "img/icons/72x72.png",
-				"114": "img/icons/114x114.png"
+				"114": "img/icons/114x114.png", 
+				"57": "img/icons/57x57.png", 
+				"72": "img/icons/72x72.png"
 			}
-		},  
+		}, 
+		"is": true, 
 		"logging": {
 			"level": "INFO"
+		}, 
+		"package_names": {
+			"android": "com.amirnathoo.wineboxtest", 
+			"ios": "com.amirnathoo.winebox"
 		}, 
 		"prefs": true, 
 		"request": {
 			"permissions": []
 		}, 
-		"tools": true,
-		"topbar": true,
-		"tabbar": true,
-		"package_names": {
-			"ios": "com.amirnathoo.winebox"
-		}
+		"tabbar": true, 
+		"tools": true, 
+		"topbar": true
 	}, 
-	"name": "Wine Box", 
+	"name": "Wine Box Test", 
 	"platform_version": "v1.3", 
 	"version": "0.2"
 }
