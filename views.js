@@ -5,7 +5,7 @@ wine.views.Picture = Backbone.View.extend({
 	render: function() {
 		var el = this.el; 
 		$(el).html($('#tmpl-picture').text());
-		wine.util.disclosure_indicator(el);
+		wine.disclosure_indicator(el);
 		if (wine.photos.length) {
 			var src = wine.photos.at(0).get('url');
 			$(el).css('background-image', 'url('+src+')');
@@ -19,7 +19,7 @@ wine.views.Picture = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
-		wine.util.resetCurrentView(this);
+		wine.resetCurrentView(this);
 		$('#rate_container').show();
 		$('#rate_container').append(this.el);
 	},
@@ -63,14 +63,14 @@ wine.views.Rate = Backbone.View.extend({
 			this.rate();
 		} else {
 			$('.ratephoto', el).html($('#tmpl-rate2').text());
-			wine.util.disclosure_indicator(el);
+			wine.disclosure_indicator(el);
 			fake_active($('.ratephoto', el));
 			$('.ratephoto', el).bind(clickEvent, this.rate);
 		}
 		return this;
 	},
 	show: function () {
-		wine.util.resetCurrentView(this);
+		wine.resetCurrentView(this);
 		$('#rate_container').show();
 		$('#rate_container').append(this.el);
 		forge.topbar.addButton({
@@ -109,12 +109,12 @@ wine.views.Rate = Backbone.View.extend({
 				forge.logging.log('... Set rating');
 				var rating = parseInt($(ev.target).parent().attr('class').split('_')[1])
 				forge.logging.log(rating);
-				wine.util.handleRatingClick(rating, $('#rate'));
+				wine.handleRatingClick(rating, $('#rate'));
 				state.get('currentPhoto').set('rating', rating);
 				addSaveButton();
 			});
 			if (state.get('currentPhoto').get('rating')) {
-				wine.util.handleRatingClick(state.get('currentPhoto').get('rating'), $('#rate'));
+				wine.handleRatingClick(state.get('currentPhoto').get('rating'), $('#rate'));
 				addSaveButton();
 			}
 		});
@@ -159,7 +159,7 @@ wine.views.List = Backbone.View.extend({
 				var rating = parseInt($(item).text());
 				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
 				fake_active($(item).parent());
-				wine.util.handleRatingClick(rating, $(item));
+				wine.handleRatingClick(rating, $(item));
 				var photo = wine.photos.at(idx);
 				$(item).parent().bind(clickEvent, function() {
 					wine.router.navigate('detail/'+wine.photos.indexOf(photo), { trigger: true });
@@ -167,14 +167,14 @@ wine.views.List = Backbone.View.extend({
 				});
 			});
 		});
-		wine.util.showDetailIcon(el);
+		wine.showDetailIcon(el);
 	},
 	close: function() {
 		$('#list_container').hide();
 		$('#list').hide();
 	},
 	show: function () {
-		wine.util.resetCurrentView(this);
+		wine.resetCurrentView(this);
 		$('#list_container').show();
 		$('#list').show();
 		forge.topbar.addButton({
@@ -196,7 +196,7 @@ wine.views.List = Backbone.View.extend({
 		wine.photos.forEach(function(item) {
 			if (!item.has('location')) {
 				forge.logging.log('... Getting location');
-				wine.util.getLocation(item.get('position'), item.get('timestamp'));
+				wine.getLocation(item.get('position'), item.get('timestamp'));
 			}
 		});
 	}
@@ -221,10 +221,10 @@ wine.views.Detail = Backbone.View.extend({
 			$('.ratephoto', el).each(function(idx, item) {
 				var rating = parseInt($(item).text());
 				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
-				wine.util.handleRatingClick(rating, $(item));
+				wine.handleRatingClick(rating, $(item));
 			});
 		});
-		wine.util.showDetailIcon(el);
+		wine.showDetailIcon(el);
 		$(el).append('<img class="detail" src="'+src+'" />');
 		$('.step', el).bind(clickEvent, function() {
 			wine.router.navigate('mapTab/'+state.get('idx'), { trigger: true });
@@ -234,7 +234,7 @@ wine.views.Detail = Backbone.View.extend({
 		return this;
 	},
 	show: function () {
-		wine.util.resetCurrentView(this);
+		wine.resetCurrentView(this);
 		$('#list_container').show();
 		$('#list_container').append(this.el);
 		forge.topbar.setTitle('Wine Detail');
@@ -271,7 +271,7 @@ wine.views.Map = Backbone.View.extend({
 		var el = this.el;
 		var script = document.createElement("script");
 		script.type = "text/javascript";
-		script.src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyAlFSCee70OJOiD7k-fz8e6ywXVVIkWErU&sensor=true&callback=wine.util.initMap";
+		script.src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyAlFSCee70OJOiD7k-fz8e6ywXVVIkWErU&sensor=true&callback=wine.initMap";
 		document.body.appendChild(script);
 		$('#map_container').append(el);
 		return this;
@@ -320,7 +320,7 @@ wine.views.Map = Backbone.View.extend({
 	},
 	show: function(idx) {
 		$('#map_container').show();
-		wine.util.resetCurrentView(this);
+		wine.resetCurrentView(this);
 		if (state.get('map').gmap) {
 			google.maps.event.trigger(state.get('map').gmap, 'resize');
 			var currentLatLng = new google.maps.LatLng(state.get('currentCoords').latitude, state.get('currentCoords').longitude, true);

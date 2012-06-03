@@ -38,4 +38,4 @@ forge.tabbar.addButton({
 });
 
 $ = $ || Zepto;
-wine.util.initialize();
+wine.initialize();
