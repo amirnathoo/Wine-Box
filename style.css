@@ -185,3 +185,111 @@ img.detail {
 	width: 100%;
 	height: 100%;
 }
+
+/* loading icon */
+<style>
+#loading {
+	width: 100%;
+}
+
+#facebookG{
+	width: 93px;
+	margin: 0 auto;
+	display: block;
+}
+
+.facebook_blockG{
+background-color:#882243;
+border:1px solid #FBFBFB;
+float:left;
+height:40px;
+margin:4px 5px 0 0;
+width:24px;
+-webkit-animation-name:bounceG;
+-webkit-animation-duration:1.4s;
+-webkit-animation-iteration-count:infinite;
+-webkit-animation-direction:linear;
+-webkit-transform:scale(0.9799999999999999);
+-moz-animation-name:bounceG;
+-moz-animation-duration:1.4s;
+-moz-animation-iteration-count:infinite;
+-moz-animation-direction:linear;
+-moz-transform:scale(0.9799999999999999);
+-o-animation-name:bounceG;
+-o-animation-duration:1.4s;
+-o-animation-iteration-count:infinite;
+-o-animation-direction:linear;
+-o-transform:scale(0.9799999999999999);
+-ms-animation-name:bounceG;
+-ms-animation-duration:1.4s;
+-ms-animation-iteration-count:infinite;
+-ms-animation-direction:linear;
+-ms-transform:scale(0.9799999999999999);
+opacity:0.1;
+}
+
+#blockG_1{
+-webkit-animation-delay:0.41999999999999993s;
+-moz-animation-delay:0.41999999999999993s;
+-o-animation-delay:0.41999999999999993s;
+-ms-animation-delay:0.41999999999999993s;
+}
+
+#blockG_2{
+-webkit-animation-delay:0.5599999999999999s;
+-moz-animation-delay:0.5599999999999999s;
+-o-animation-delay:0.5599999999999999s;
+-ms-animation-delay:0.5599999999999999s;
+}
+
+#blockG_3{
+-webkit-animation-delay:0.7s;
+-moz-animation-delay:0.7s;
+-o-animation-delay:0.7s;
+-ms-animation-delay:0.7s;
+}
+
+@-webkit-keyframes bounceG{
+0%{
+-webkit-transform:scale(1.2);
+opacity:1}
+
+100%{
+-webkit-transform:scale(0.7);
+opacity:0.1}
+
+}
+
+@-moz-keyframes bounceG{
+0%{
+-moz-transform:scale(1.2);
+opacity:1}
+
+100%{
+-moz-transform:scale(0.7);
+opacity:0.1}
+
+}
+
+@-o-keyframes bounceG{
+0%{
+-o-transform:scale(1.2);
+opacity:1}
+
+100%{
+-o-transform:scale(0.7);
+opacity:0.1}
+
+}
+
+@-ms-keyframes bounceG{
+0%{
+-ms-transform:scale(1.2);
+opacity:1}
+
+100%{
+-ms-transform:scale(0.7);
+opacity:0.1}
+
+}
+</style>

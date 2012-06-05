@@ -106,6 +106,7 @@ var wine = {
 			var firebase = forge.is.web()? wine.publicFirebase: wine.userFirebase;
 			firebase.once('value', function(snapshot) {
 				forge.logging.log('firebase.once triggered');
+				$('#loading').remove();
 				snapshot.forEach(function(photo) {
 					forge.logging.log('Adding photo');
 					var photo_model = new wine.models.Photo(photo.val());
