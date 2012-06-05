@@ -10,7 +10,7 @@ var fake_active = function(el) {
 }
 
 // Setup "sensible" click/touch handling
-var clickEvent = 'ontouchend' in document.documentElement ? 'tap' : 'click';
+var clickEvent = 'ontouchend' in document.documentElement && forge.is.mobile() ? 'tap' : 'click';
 
 if (clickEvent == 'tap') {
 	var currentTap = true;
@@ -42,8 +42,13 @@ var wine = {
 	initialize: function() {
 		forge.logging.log('Initializing...');
 		wine.initUser(function() {
+			state.set('list', new wine.views.List());	
+			state.get('list').render();
+			forge.logging.log('Pre-rendered wine list');
+			state.set('map', new wine.views.Map());
+			state.get('map').render();
+			forge.logging.log('Pre-rendered map');
 			wine.initStorage();
-			wine.preRenderViews();
 			Backbone.history.start();
 			if (forge.is.mobile()) {
 				if (state.get('rateButton')) {
@@ -57,15 +62,16 @@ var wine = {
 							clearInterval(window.initInterval);
 						} 
 						}, 200);
-					}
 				}
-				if (forge.is.web()) {
-					wine.router.navigate("listTab", { trigger: true});
-				}
+			}
+			if (forge.is.web()) {
+				wine.router.navigate("listTab", { trigger: true});
+			}
 		});
 	},
 	initUser: function(cb) {
 		forge.prefs.get('user', function(user) {
+			forge.logging.log('User: '+user);
 			wine.user = user || wine.getUUID();
 			forge.prefs.set('user', wine.user);
 			cb();
@@ -79,11 +85,14 @@ var wine = {
 			}).toUpperCase();
 	},
 	initStorage: function() {
+		forge.logging.log('... Start initStorage');
 		//Initialize Firebase
 		wine.publicFirebase = new Firebase('http://gamma.firebase.com/winebox/public');
-		wine.userFirebase = new Firebase('http://gamma.firebase.com/winebox').child(wine.user);
+		wine.userFirebase = new Firebase('http://gamma.firebase.com/winebox/'+wine.user);
+		wine.photos = new wine.collections.Photos();
 		//Initialize collection
 		if (localStorage.wine) {
+			forge.logging.log('Migrating storage');
 			//Handle migration
 			wine.photos = new wine.collections.Photos(JSON.parse(localStorage.wine));
 			wine.photos.forEach(function(photo) {
@@ -93,45 +102,62 @@ var wine = {
 			});
 			localStorage.clear();
 		} else {
-			wine.photos = new wine.collections.Photos();
-			wine.userFirebase.once('value', function(snapshot) {
+			forge.logging.log('Read from  Firebase');
+			var firebase = forge.is.web()? wine.publicFirebase: wine.userFirebase;
+			firebase.once('value', function(snapshot) {
+				forge.logging.log('firebase.once triggered');
 				snapshot.forEach(function(photo) {
-					wine.photos.add(new wine.models.Photo(photo.val()));
+					forge.logging.log('Adding photo');
+					var photo_model = new wine.models.Photo(photo.val());
+					if (photo_model.get('user') === wine.user && photo_model.has('dataurl')) {
+						wine.setDataUrl(photo_model.get('url'), photo_model.get('timestamp'));
+					}
+					wine.photos.add(photo_model);
+					state.get('list').add(photo_model);
+					forge.logging.log('Added photo from Firebase');
 				});
 			});
-
 		}
 		//Add event handlers
-		wine.photos.on("add", function(photo) {
-			photo.set('user', wine.user);
-			state.get('list').add(photo);
-			wine.publicFirebase.child(photo.get('timestamp')).set(photo.toJSON());
-			wine.userFirebase.child(photo.get('timestamp')).set(photo.toJSON());
-		});
 		wine.photos.on("remove", function(photo) {
 			state.get('list').removeByIndex(state.get('idx'));
-			wine.publicFirebase.child(String(photo.get('timestamp'))).remove();
-			wine.userFirebase.child(String(photo.get('timestamp'))).remove();	
-		});
-		wine.userFirebase.on("child_added", function(child) {
-			if (child.user === wine.user && !state.get('list').exists(child.timestamp)) {
-				var photo = wine.models.Photo(child);
-				state.get('list').add(photo);
-			}
-		});	
-		wine.userFirebase.on("child_removed", function(child) {
-			if (child.user === wine.user) {
-				state.get('list').removeByTimestamp(child.get(timestamp));
-			}
+			wine.publicFirebase.child(photo.get('timestamp')).remove();
+			wine.userFirebase.child(photo.get('timestamp')).remove();	
 		});
 	},
-	preRenderViews: function() {
-		state.set('list', new wine.views.List());	
-		state.get('list').render();
-		forge.logging.log('Pre-rendered wine list');
-		state.set('map', new wine.views.Map());
-		state.get('map').render();
-		forge.logging.log('Pre-rendered map');
+	setDataUrl: function(src, timestamp) {
+		// create image
+		var image = document.createElement('img');
+
+		// set src using remote image location
+		image.src = src;
+
+		// wait til it has loaded
+		image.onload = function (){
+
+			// set up variables
+			var fWidth = image.width;
+			var fHeight = image.height;
+
+			// create canvas
+			var canvas = document.createElement('canvas');
+			canvas.id = 'canvas';
+			canvas.width = fWidth;
+			canvas.height = fHeight;
+			var context = canvas.getContext('2d');
+
+			// draw image to canvas
+			context.drawImage(image, 0, 0, fWidth, fHeight, 0, 0, fWidth, fHeight);
+
+			// get data url 
+			var dataurl = canvas.toDataURL('image/jpeg');
+			
+			//set data url in Firebase
+			wine.publicFirebase.child(timestamp).child('dataurl').set(String(dataurl));
+			wine.userFirebase.child(timestamp).child('dataurl').set(String(dataurl));
+			forge.logging.log('Set data url for: '+timestamp);
+			forge.logging.log(String(dataurl));
+		}
 	},
 	disclosure_indicator: function(el) {
 		forge.tools.getURL('img/disclosure_indicator.png', function(src) {

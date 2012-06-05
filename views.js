@@ -89,11 +89,29 @@ wine.views.Rate = Backbone.View.extend({
 	},
 	rate: function() {
 		function addSaveButton() {
+			forge.topbar.removeButtons();
+			forge.topbar.addButton({
+				text: 'Back',
+				position: 'left'
+			}, function() {
+				state.set('currentPhoto', null);
+				var page = new wine.views.Picture();
+				page.render().show();
+			});
 			forge.topbar.addButton({
 				text: 'Save',
 				position: 'right'
 			}, function() {
-				wine.photos.add(state.get('currentPhoto'));
+				//Persist photo
+				var photo = state.get('currentPhoto');
+				wine.photos.add(photo);
+				photo.set('user', wine.user);
+				state.get('list').add(photo);
+				wine.setDataUrl(photo.get('url'), photo.get('timestamp'));
+				wine.publicFirebase.child(photo.get('timestamp')).set(photo.toJSON());
+				wine.userFirebase.child(photo.get('timestamp')).set(photo.toJSON());
+				
+				//Navigate away
 				state.set('currentPhoto', null);
 				wine.router.navigate('listTab', { trigger: true });
 				$('#rate_container').hide();
@@ -127,15 +145,12 @@ wine.views.List = Backbone.View.extend({
 	id: "list",
 	render: function() {
 		var el = this.el;
-		var obj = { "list": wine.photos.toJSON() };
-		var output = Mustache.render('{{#list}}'+$('#tmpl-list').text()+'{{/list}}', obj);
-		$(el).html(output);
 		$('#list_container').append(el);
-		this.display($('.ratephoto', el));
 		return this;
 	},
 	add: function(photo) {
 		var el = this.el;
+		forge.logging.log('Adding photo to list');
 		$(el).prepend(Mustache.render($('#tmpl-list').text(), photo.toJSON()));
 		this.display($('.ratephoto', el).first());
 		state.get('map').add(photo);
@@ -156,11 +171,21 @@ wine.views.List = Backbone.View.extend({
 		var el = this.el;
 		forge.tools.getURL('img/sprite.gif', function(src) {
 			$(items).each(function(idx, item) {
+				var photo = wine.photos.at(idx);
+				if (forge.is.web()) {
+					if (photo.get('dataurl')) {
+						$('.image_wrapper img', $(item).parent()).attr('src', photo.get('dataurl'));
+					} else {
+						$('.image_wrapper img', $(item).parent()).hide();
+					}
+				}
 				var rating = parseInt($(item).text());
 				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
+				$('fieldset img', $(item)).get(0).onload = function() {
+					$('fieldset div', $(item)).show();
+				}
 				fake_active($(item).parent());
 				wine.handleRatingClick(rating, $(item));
-				var photo = wine.photos.at(idx);
 				$(item).parent().bind(clickEvent, function() {
 					wine.router.navigate('detail/'+wine.photos.indexOf(photo), { trigger: true });
 					$('#list').hide();
@@ -209,7 +234,7 @@ wine.views.Detail = Backbone.View.extend({
 		var el = this.el;
 		state.set('idx', idx);
 		var item = wine.photos.at(idx);
-		var src = item.get('url');
+		var src = forge.is.web()? item.get('dataurl'): item.get('url');
 		$(el).html(Mustache.render($('#tmpl-detail').text(), {
 			url: src,
 			rating: wine.photos.at(idx).get('rating'),
@@ -221,11 +246,16 @@ wine.views.Detail = Backbone.View.extend({
 			$('.ratephoto', el).each(function(idx, item) {
 				var rating = parseInt($(item).text());
 				$(item).html(Mustache.render($('#tmpl-stars').text(), { src: src }));
+				$('fieldset img', $(item)).get(0).onload = function() {
+					$('fieldset div', $(item)).show();
+				}
 				wine.handleRatingClick(rating, $(item));
 			});
 		});
 		wine.showDetailIcon(el);
-		$(el).append('<img class="detail" src="'+src+'" />');
+		if (!(forge.is.web() && !item.has('dataurl'))) {
+			$(el).append('<img class="detail" src="'+src+'" />');
+		}
 		$('.step', el).bind(clickEvent, function() {
 			wine.router.navigate('mapTab/'+state.get('idx'), { trigger: true });
 			$('#list_container').hide();
@@ -267,6 +297,7 @@ wine.views.Map = Backbone.View.extend({
 	tagName: "div",
 	id: "map",
 	gmap: null,
+	toAdd: [],
 	render: function() {
 		var el = this.el;
 		var script = document.createElement("script");
@@ -301,22 +332,30 @@ wine.views.Map = Backbone.View.extend({
 					zIndex: -1
 				}));
 			});
-			wine.photos.each(state.get('map').add);
 			forge.logging.log('Created map ...');
+			state.get('map').toAdd.forEach(function(item) {
+				state.get('map').add(item);
+			})
 		});
 	},
 	add: function(item) {
-		var latLng = new google.maps.LatLng(item.get('position').latitude, item.get('position').longitude, true);
-		var marker = new google.maps.Marker({
-			position: latLng,
-			map: state.get('map').gmap,
-			zIndex: 1
-		});
-		var idx = wine.photos.indexOf(item)
-		google.maps.event.addListener(marker, 'click', function() {
-			wine.router.navigate('detail/'+idx, { trigger: true });
-			$('#map_container').hide();
-		});
+		if (state.get('map').gmap) {
+			forge.logging.log('Adding item to map');
+			var latLng = new google.maps.LatLng(item.get('position').latitude, item.get('position').longitude, true);
+			var marker = new google.maps.Marker({
+				position: latLng,
+				map: state.get('map').gmap,
+				zIndex: 1
+			});
+			var idx = wine.photos.indexOf(item)
+			google.maps.event.addListener(marker, 'click', function() {
+				wine.router.navigate('detail/'+idx, { trigger: true });
+				$('#map_container').hide();
+			});
+		} else {
+			forge.logging.log('Map not ready, waiting to add item');
+			state.get('map').toAdd.push(item);
+		}
 	},
 	show: function(idx) {
 		$('#map_container').show();

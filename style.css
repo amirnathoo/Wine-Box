@@ -112,6 +112,7 @@ div.left{
 }
 .ratephoto fieldset div {
 	width: 7em;
+	display: none;
 }
 .ratephoto fieldset br {
 	display:none;
