@@ -159,7 +159,8 @@ wine.views.List = Backbone.View.extend({
 		state.get('map').add(photo);
 	},
 	remove: function(timestamp) {
-		$('#_'+timestamp, el).remove();
+		$('#_'+timestamp).remove();
+		//TODO need to remove marker from map as well
 	},
 	addImage: function(photo_obj) {
 		$('#_'+photo_obj.timestamp+' .image_wrapper img').attr('src', photo_obj.dataurl).show();
@@ -188,7 +189,10 @@ wine.views.List = Backbone.View.extend({
 				fake_active($(item).parent());
 				wine.handleRatingClick(rating, $(item));
 				$(item).parent().bind(clickEvent, function() {
-					wine.router.navigate('detail/'+wine.photos.indexOf(photo), { trigger: true });
+					var timestamp = parseInt($(this).attr('id').split('_')[1]);
+					var index = wine.photos.indexOf(wine.photos.where({timestamp: timestamp})[0]);
+					forge.logging.log('Showing detail for timestamp: '+timestamp+' at index: '+index);
+					wine.router.navigate('detail/'+index, { trigger: true });
 					$('#list').hide();
 				});
 			});
