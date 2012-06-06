@@ -215,14 +215,16 @@ wine.views.List = Backbone.View.extend({
 			$('#list_container').hide();
 			$('#list').hide();
 		});
-		forge.topbar.addButton({
-			text: 'Add',
-			position: 'right'
-		}, function() {
-			wine.router.navigate('rateTab', { trigger: true });
-			$('#list_container').hide();
-			$('#list').hide();
-		});
+		if (forge.is.mobile()) {
+			forge.topbar.addButton({
+				text: 'Add',
+				position: 'right'
+			}, function() {
+				wine.router.navigate('rateTab', { trigger: true });
+				$('#list_container').hide();
+				$('#list').hide();
+			});
+		}
 		wine.photos.forEach(function(item) {
 			if (!item.has('location')) {
 				forge.logging.log('... Getting location');
@@ -280,16 +282,18 @@ wine.views.Detail = Backbone.View.extend({
 		}, function() {
 			$('#detail').remove();
 		});
-		forge.topbar.addButton({
-			text: 'Delete',
-			position: 'right'
-		}, function() {
-			if (confirm("Confirm delete?")) {
-				wine.photos.remove(wine.photos.at(state.get('idx')));
-				wine.router.navigate('listTab', { trigger: true });
-				$('#detail').remove();
-			}
-		});
+		if (forge.is.mobile()) {
+			forge.topbar.addButton({
+				text: 'Delete',
+				position: 'right'
+			}, function() {
+				if (confirm("Confirm delete?")) {
+					wine.photos.remove(wine.photos.at(state.get('idx')));
+					wine.router.navigate('listTab', { trigger: true });
+					$('#detail').remove();
+				}
+			});
+		}
 	},
 	close: function() {
 		$('#list_container').hide();
@@ -380,15 +384,13 @@ wine.views.Map = Backbone.View.extend({
 			this.initMap();
 			$('#map').html('<div class="title">Loading...</div>');
 		}
-		if (idx) {
-			forge.topbar.addButton({
-				text: 'Back',
-				position: 'left',
-				type: 'back'
-			}, function() {
-				$('#map_container').hide();
-			});
-		}
+		forge.topbar.addButton({
+			text: 'Back',
+			position: 'left',
+			type: 'back'
+		}, function() {
+			$('#map_container').hide();
+		});
 	},
 	close: function() {
 		$('#map_container').hide();

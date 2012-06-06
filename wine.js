@@ -10,7 +10,7 @@ var fake_active = function(el) {
 }
 
 // Setup "sensible" click/touch handling
-var clickEvent = 'ontouchend' in document.documentElement && forge.is.mobile() ? 'tap' : 'click';
+var clickEvent = 'ontouchend' in document.documentElement ? 'tap' : 'click';
 
 if (clickEvent == 'tap') {
 	var currentTap = true;

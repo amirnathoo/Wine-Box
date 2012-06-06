@@ -11,7 +11,7 @@ wine.types.Router = Backbone.Router.extend({
 	},
 	rateTab: function() {
 		forge.is.mobile() && state.get('rateButton').setActive();
-		forge.is.mobile() && forge.topbar.setTitle("Rate Wine");
+		forge.topbar.setTitle("Rate Wine");
 		if (state.get('currentPhoto')) {
 			var page = new wine.views.Rate();
 		} else {
@@ -20,13 +20,13 @@ wine.types.Router = Backbone.Router.extend({
 		page.render().show();
 	},
 	listTab: function() {
-		forge.is.mobile() &&  state.get('listButton').setActive();
-		forge.is.mobile() &&  forge.topbar.setTitle("Wine List");
+		forge.is.mobile() && state.get('listButton').setActive();
+		forge.topbar.setTitle("Wine List");
 		state.get('list').show();
 	},
 	mapTab: function(idx) {
-		forge.is.mobile() &&  state.get('mapButton').setActive();
-		forge.is.mobile() &&  forge.topbar.setTitle("Wine Map");
+		forge.is.mobile() && state.get('mapButton').setActive();
+		forge.topbar.setTitle("Wine Map");
 		state.get('map').show(idx);
 	},
 	detail: function(idx) {
