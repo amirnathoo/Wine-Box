@@ -102,29 +102,52 @@ var wine = {
 			});
 			localStorage.clear();
 		} else {
-			forge.logging.log('Read from  Firebase');
-			var firebase = forge.is.web()? wine.publicFirebase: wine.userFirebase;
-			firebase.once('value', function(snapshot) {
-				forge.logging.log('firebase.once triggered');
-				$('#loading').remove();
-				snapshot.forEach(function(photo) {
-					forge.logging.log('Adding photo');
-					var photo_model = new wine.models.Photo(photo.val());
-					if (photo_model.get('user') === wine.user && photo_model.has('dataurl')) {
-						wine.setDataUrl(photo_model.get('url'), photo_model.get('timestamp'));
-					}
-					wine.photos.add(photo_model);
-					state.get('list').add(photo_model);
-					forge.logging.log('Added photo from Firebase');
+			if (forge.is.web()) {
+				wine.publicFirebase.on('child_added', function(photo) {
+					forge.logging.log('firebase on child_added triggered');
+					$('#loading').remove();
+					wine.addPhotoFromFirebase(photo);
 				});
-			});
+				wine.publicFirebase.on('child_removed', function(photo) {
+					forge.logging.log('firebase on child_removed triggered');
+					forge.logging.log('removing from list with timestamp: '+photo.val().timestamp);
+					state.get('list').remove(photo.val().timestamp);
+				});
+				wine.publicFirebase.on('child_changed', function(photo) {
+					forge.logging.log('firebase on child_changed triggered');
+					forge.logging.log('updating image with timestamp: '+photo.val().timestamp);
+					forge.logging.log('using dataurl: '+photo.val().dataurl);
+					wine.photos.where({timestamp: photo.val().timestamp})[0].set("dataurl", photo.val().dataurl);
+					state.get('list').addImage(photo.val());
+				});
+			} else {
+				forge.logging.log('Read from  Firebase');
+				wine.userFirebase.once('value', function(snapshot) {
+					forge.logging.log('firebase.once triggered');
+					$('#loading').remove();
+					snapshot.forEach(function(photo) {
+						var photo_model = wine.addPhotoFromFirebase(photo);
+						if (photo_model.get('user') === wine.user && !photo_model.has('dataurl')) {
+							wine.setDataUrl(photo_model.get('url'), photo_model.get('timestamp'));
+						}
+					});
+				});
+			}
 		}
 		//Add event handlers
 		wine.photos.on("remove", function(photo) {
-			state.get('list').removeByIndex(state.get('idx'));
+			state.get('list').remove(photo.get('timestamp'));
 			wine.publicFirebase.child(photo.get('timestamp')).remove();
 			wine.userFirebase.child(photo.get('timestamp')).remove();	
 		});
+	},
+	addPhotoFromFirebase: function(photo) {
+		forge.logging.log('Adding photo');
+		var photo_model = new wine.models.Photo(photo.val());
+		wine.photos.add(photo_model);
+		state.get('list').add(photo_model);
+		forge.logging.log('Added photo from Firebase');
+		return photo_model;
 	},
 	setDataUrl: function(src, timestamp) {
 		// create image

@@ -123,6 +123,9 @@ wine.views.Rate = Backbone.View.extend({
 			$('#rate_container .ratephoto').unbind(clickEvent, this.rate);
 			$('#rate_container .ratephoto').removeClass('listenactive');
 			$('#rate_container .ratephoto').html(Mustache.render($('#tmpl-stars').text(), { src: src }));
+			$('fieldset img', $('#rate_container')).get(0).onload = function() {
+				$('fieldset div', $('#rate_container')).show();
+			}
 			$('#rate_container .ratephoto img').bind(clickEvent, function(ev) {
 				forge.logging.log('... Set rating');
 				var rating = parseInt($(ev.target).parent().attr('class').split('_')[1])
@@ -155,13 +158,11 @@ wine.views.List = Backbone.View.extend({
 		this.display($('.ratephoto', el).first());
 		state.get('map').add(photo);
 	},
-	removeByIndex: function(idx) {
-		var el = this.el;
-		$('.step', el).eq(idx).remove();
-	},
-	removeByTimestamp: function(timestamp) {
-		var el = this.el;
+	remove: function(timestamp) {
 		$('#_'+timestamp, el).remove();
+	},
+	addImage: function(photo_obj) {
+		$('#_'+photo_obj.timestamp+' .image_wrapper img').attr('src', photo_obj.dataurl).show();
 	},
 	exists: function(timestamp) {
 		var el = this.el;
