@@ -1,5 +1,3 @@
-forge.enableDebug();
-
 var state = new wine.models.State();
 
 if (forge.is.web()) {
@@ -44,5 +42,4 @@ forge.tabbar.addButton({
 	});
 });
 
-$ = $ || Zepto;
 wine.initialize();

@@ -40,7 +40,7 @@ div.listenactive:active, div.listenactive.active {
 
 div.listenactive:active img, div.listenactive.active img, 
 div.listenactive:active fieldset, div.listenactive.active fieldset {
-	display:none;
+	opacity: 0; /* important not to display:none since otherwise click handler doesn't fire on Firefox */
 }
 
 div.label {

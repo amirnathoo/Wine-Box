@@ -4,6 +4,7 @@ wine.views.Picture = Backbone.View.extend({
 	id: "picture",
 	render: function() {
 		var el = this.el; 
+		forge.logging.log('Start render picture ...');
 		$(el).html($('#tmpl-picture').text());
 		wine.disclosure_indicator(el);
 		if (wine.photos.length) {
@@ -16,12 +17,15 @@ wine.views.Picture = Backbone.View.extend({
 		}
 		$('#choosephoto', el).bind(clickEvent, this.choose);
 		fake_active($('#choosephoto', el));
+		forge.logging.log('... complete render picture.');
 		return this;
 	},
 	show: function () {
+		forge.logging.log('Start show picture ...');
 		wine.resetCurrentView(this);
 		$('#rate_container').show();
 		$('#rate_container').append(this.el);
+		forge.logging.log('... complete show picture.');
 	},
 	close: function() {
 		$('#rate_container').hide();
@@ -333,11 +337,12 @@ wine.views.Map = Backbone.View.extend({
 			state.get('map').gmap = new google.maps.Map(document.getElementById('map'), myOptions);
 			forge.tools.getURL('img/blue-pin.png', function(src) {
 				forge.logging.log('... Add position marker');
+				var gmap = state.get('map').gmap
 				state.set('currentMarker', new google.maps.Marker({
 					position: latLng,
 					title: "Current Position",
 					icon: src,
-					map: state.get('map').gmap,
+					map: gmap,
 					zIndex: -1
 				}));
 			});

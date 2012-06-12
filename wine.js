@@ -1,3 +1,5 @@
+forge.enableDebug();
+
 //Fake support of :active on Android
 var fake_active = function(el) {
 	if (forge.is.android() && $(el).hasClass('listenactive')) {
@@ -53,18 +55,17 @@ var wine = {
 			if (forge.is.mobile()) {
 				if (state.get('rateButton')) {
 					wine.router.navigate("rateTab", { trigger: true});
-					forge.logging.log('... completed initialization');
+					forge.logging.log('... completed initialization immediately');
 				} else {
 					window.initInterval = setInterval(function() {
 						if (state.get('rateButton')) {
 							wine.router.navigate("rateTab", { trigger: true});
-							forge.logging.log('... completed initialization');
+							forge.logging.log('... completed initialization after delay');
 							clearInterval(window.initInterval);
 						} 
 						}, 200);
 				}
-			}
-			if (forge.is.web()) {
+			} else {
 				wine.router.navigate("listTab", { trigger: true});
 			}
 		});
