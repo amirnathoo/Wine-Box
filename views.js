@@ -161,6 +161,7 @@ wine.views.List = Backbone.View.extend({
 		$(el).prepend(Mustache.render($('#tmpl-list').text(), photo.toJSON()));
 		this.display($('.ratephoto', el).first());
 		state.get('map').add(photo);
+		wine.getLocation(photo.get('position'), photo.get('timestamp'));
 	},
 	remove: function(timestamp) {
 		$('#_'+timestamp).remove();
@@ -229,12 +230,6 @@ wine.views.List = Backbone.View.extend({
 				$('#list').hide();
 			});
 		}
-		wine.photos.forEach(function(item) {
-			if (!item.has('location')) {
-				forge.logging.log('... Getting location');
-				wine.getLocation(item.get('position'), item.get('timestamp'));
-			}
-		});
 	}
 });
 

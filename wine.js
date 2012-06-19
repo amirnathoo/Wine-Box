@@ -1,5 +1,3 @@
-forge.enableDebug();
-
 //Fake support of :active on Android
 var fake_active = function(el) {
 	if (forge.is.android() && $(el).hasClass('listenactive')) {

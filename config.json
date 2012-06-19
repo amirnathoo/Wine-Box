@@ -22,7 +22,7 @@
 			"level": "INFO"
 		}, 
 		"package_names": {
-			"android": "com.amirnathoo.wineboxtest", 
+			"android": "com.amirnathoo.winebox", 
 			"ios": "com.amirnathoo.winebox"
 		}, 
 		"prefs": true, 
@@ -33,7 +33,7 @@
 		"tools": true, 
 		"topbar": true
 	}, 
-	"name": "Wine Box Test", 
+	"name": "Wine Box", 
 	"platform_version": "v1.3", 
 	"version": "0.2"
 }
