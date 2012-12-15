@@ -1,39 +1,41 @@
 {
-	"author": "nathooamir@gmail.com", 
-	"config_version": "2", 
-	"description": "Keep track of which wines you like", 
-	"modules": {
-		"file": true, 
-		"geolocation": true, 
-		"icons": {
-			"android": {
-				"36": "img/icons/36x36.png", 
-				"48": "img/icons/48x48.png", 
-				"72": "img/icons/72x72.png"
-			}, 
-			"ios": {
-				"114": "img/icons/114x114.png", 
-				"57": "img/icons/57x57.png", 
-				"72": "img/icons/72x72.png"
-			}
-		}, 
-		"is": true, 
-		"logging": {
-			"level": "INFO"
-		}, 
-		"package_names": {
-			"android": "com.amirnathoo.winebox", 
-			"ios": "com.amirnathoo.winebox"
-		}, 
-		"prefs": true, 
-		"request": {
-			"permissions": []
-		}, 
-		"tabbar": true, 
-		"tools": true, 
-		"topbar": true
-	}, 
-	"name": "Wine Box", 
-	"platform_version": "v1.3", 
-	"version": "0.2"
+    "config_version": "3", 
+    "uuid": "4e85e53e8c2011e1931112313d1adcbe", 
+    "author": "nathooamir@gmail.com", 
+    "modules": {
+        "package_names": {
+            "android": "com.amirnathoo.winebox", 
+            "ios": "com.amirnathoo.winebox"
+        }, 
+        "geolocation": true, 
+        "logging": {
+            "level": "INFO"
+        }, 
+        "file": true, 
+        "icons": {
+            "android": {
+                "36": "img/icons/36x36.png", 
+                "48": "img/icons/48x48.png", 
+                "72": "img/icons/72x72.png"
+            }, 
+            "ios": {
+                "114": "img/icons/114x114.png", 
+                "57": "img/icons/57x57.png", 
+                "72": "img/icons/72x72.png"
+            }
+        }, 
+        "is": true, 
+        "request": {
+            "permissions": []
+        }, 
+        "reload": true, 
+        "tabbar": true, 
+        "prefs": true, 
+        "tools": true, 
+        "topbar": true
+    }, 
+    "name": "Wine Box", 
+    "platform_version": "v1.4", 
+    "version": "0.2", 
+    "description": "Keep track of which wines you like"
 }
