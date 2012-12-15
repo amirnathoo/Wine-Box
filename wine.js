@@ -86,8 +86,8 @@ var wine = {
 	initStorage: function() {
 		forge.logging.log('... Start initStorage');
 		//Initialize Firebase
-		wine.publicFirebase = new Firebase('http://gamma.firebase.com/winebox/public');
-		wine.userFirebase = new Firebase('http://gamma.firebase.com/winebox/'+wine.user);
+		wine.publicFirebase = new Firebase('https://winebox.firebaseio.com/public');
+		wine.userFirebase = new Firebase('https://winebox.firebaseio.com/'+wine.user);
 		wine.photos = new wine.collections.Photos();
 		//Initialize collection
 		if (localStorage.wine) {
