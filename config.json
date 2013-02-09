@@ -12,6 +12,7 @@
 				"72": "img/icons/72x72.png"
 			}, 
 			"ios": {
+				"144": "img/icons/114x114.png",
 				"114": "img/icons/114x114.png", 
 				"57": "img/icons/57x57.png", 
 				"72": "img/icons/72x72.png"
@@ -34,6 +35,6 @@
 		"topbar": true
 	}, 
 	"name": "Wine Box", 
-	"platform_version": "v1.3", 
+	"platform_version": "v1.4", 
 	"version": "0.2"
 }
