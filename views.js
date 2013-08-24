@@ -36,7 +36,7 @@ wine.views.Picture = Backbone.View.extend({
 		var self = this;
 		self.selImage = undefined;
 		forge.file.getImage({width: 500, height: 500}, function (file) {
-			forge.file.imageURL(file, function (url) {
+			forge.file.URL(file, function (url) {
 				forge.logging.log('Got photo with url: '+url);
 				forge.geolocation.getCurrentPosition(function(position) {
 					state.set('currentCoords', position.coords);

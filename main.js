@@ -3,13 +3,10 @@ var state = new wine.models.State();
 if (forge.is.web()) {
 	forge.topbar.show();
 	forge.topbar.setTitle('Wine List');
-}
+} else {
+	forge.tabbar.setActiveTint([88,22,43,255]);
 
-//Style top bar and tab bar
-forge.topbar.setTint([88,22,43,255]);
-forge.tabbar.setActiveTint([88,22,43,255]);
-
-forge.tabbar.addButton({
+	forge.tabbar.addButton({
 	text: "Rate Wine",
 	icon: "img/star.png",
 	index: 0
@@ -41,5 +38,9 @@ forge.tabbar.addButton({
 		wine.router.navigate('mapTab', { trigger: true });
 	});
 });
+}
+
+//Style top bar and tab bar
+forge.topbar.setTint([88,22,43,255]);
 
 wine.initialize();
