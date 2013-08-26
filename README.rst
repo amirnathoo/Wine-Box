@@ -23,6 +23,7 @@ Getting the code
    * cd src
    * mv identity.json ..
    * rm -rf *
+   * rm .forgeignore
 
 3. Checkout this repository and copy the identity.json file back:
 
